@@ -1,0 +1,19 @@
+{
+  "name": "paixpad",
+  "version": "1.0.0",
+  "private": true,
+  "description": "paiXpad - Every coin's whole pie. Transparent Solana launchpad analytics.",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "paixpad",
+    "solana",
+    "pumpfun",
+    "launchpad",
+    "crypto",
+    "pie-chart"
+  ],
+  "author": "WerelayAgent",
+  "license": "MIT"
+}

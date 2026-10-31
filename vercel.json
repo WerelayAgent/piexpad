@@ -1,0 +1,22 @@
+{
+  "framework": null,
+  "buildCommand": "exit 0",
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/((?!assets/|art/|favicon.*|apple-touch-icon.*|og.png).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}
