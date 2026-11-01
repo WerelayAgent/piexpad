@@ -1,23 +1,23 @@
-# paiXpad — Every Coin's Whole Pie
+# piexpad — Every Coin's Whole Pie
 
 <div align="center">
-  <img src="art/mark.webp" alt="paiXpad Logo" width="160" />
-  <p><strong>paiXpad launches Solana coins and prints every coin's whole pie: who held the supply when trading opened, the creator's side, and the transaction behind every slice.</strong></p>
+  <img src="art/mark.webp" alt="piexpad Logo" width="160" />
+  <p><strong>piexpad launches Solana coins and prints every coin's whole pie: who held the supply when trading opened, the creator's side, and the transaction behind every slice.</strong></p>
 
   [![Contract Address](https://img.shields.io/badge/Contract-live%20now%20on%20pump.fun-orange?style=for-the-badge&logo=solana)](https://pump.fun/)
-  [![Ticker](https://img.shields.io/badge/Ticker-%24PAIXPAD-blue?style=for-the-badge)](#)
+  [![Ticker](https://img.shields.io/badge/Ticker-%24PIEXPAD-blue?style=for-the-badge)](#)
   [![Platform](https://img.shields.io/badge/Venue-pump.fun-brightgreen?style=for-the-badge)](https://pump.fun/)
 </div>
 
 ---
 
-## 🥧 What is paiXpad?
+## 🥧 What is piexpad?
 
-**paiXpad** is a transparent token analytics and launchpad interface built on Solana. It breaks down token allocations into an intuitive, verifiable visual pie:
+**piexpad** is a transparent token analytics and launchpad interface built on Solana. It breaks down token allocations into an intuitive, verifiable visual pie:
 
 - **Creator Allocation**: Exactly how much supply the dev held at trading start.
 - **Top Holders & Snipers**: First three slots, top 10 holders, and associated transactions.
-- **Non-Custodial**: paiXpad holds no funds, requires no keys, and executes directly via your own wallet (Phantom, Solflare, Backpack).
+- **Non-Custodial**: piexpad holds no funds, requires no keys, and executes directly via your own wallet (Phantom, Solflare, Backpack).
 
 ---
 
@@ -25,12 +25,12 @@
 
 | Property | Value |
 | :--- | :--- |
-| **Token Name** | **paiXpad** |
-| **Ticker** | **$PAIXPAD** |
+| **Token Name** | **piexpad** |
+| **Ticker** | **$PIEXPAD** |
 | **Network** | Solana (Mainnet) |
 | **Contract Address (CA)** | `live now on pump.fun` |
 | **Launch Venue** | [pump.fun](https://pump.fun/) |
-| **Official X** | [@paiXpad](https://x.com/paiXpad) |
+| **Official X** | [@piexpad](https://x.com/piexpad) |
 
 ---
 

@@ -1,13 +1,13 @@
 {
-  "name": "paixpad",
+  "name": "piexpad",
   "version": "1.0.0",
   "private": true,
-  "description": "paiXpad - Every coin's whole pie. Transparent Solana launchpad analytics.",
+  "description": "piexpad - Every coin's whole pie. Transparent Solana launchpad analytics.",
   "scripts": {
     "start": "npx serve ."
   },
   "keywords": [
-    "paixpad",
+    "piexpad",
     "solana",
     "pumpfun",
     "launchpad",
