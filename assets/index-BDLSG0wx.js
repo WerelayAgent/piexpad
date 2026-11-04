@@ -195,4 +195,544 @@ async function qf(u,{signal:s}={}){
   if(typeof u==="string"&&u.includes("/api/launch"))return{curveTokens:8e8,creatorFeeBps:100,protocolFeeBps:100};
   throw Object.assign(Error("piexpad could not read this right now."),{status:500});
 }
-async function vE(u,s,r={}){const c=await fetch(u,{method:"POST",headers:{"Content-Type":"application/json",...r},body:JSON.stringify(s)}),o=await c.json().catch(()=>null);if(!c.ok)throw Object.assign(Error((o==null?void 0:o.error)||"Something went wrong. Nothing was sent."),{status:c.status,code:o==null?void 0:o.code,body:o,headers:c.headers});return o}const Sc=new Map;Sc.set("/api/board",{data:_boardData,error:null,at:Date.now(),inflight:null,subs:new Set,timer:null,ms:8e3});function Yf(u){return Sc.has(u)||Sc.set(u,{data:null,error:null,at:0,inflight:null,subs:new Set,timer:null,ms:0}),Sc.get(u)}async function bc(u,s=!1){const r=Yf(u);return r.inflight?r.inflight:!s&&r.data&&Date.now()-r.at<Math.max(2e3,r.ms/2)||typeof document<"u"&&document.hidden&&r.data?r.data:(r.inflight=qf(u).then(c=>(r.data=c,r.error=null,r.at=Date.now(),r.checked=Date.now(),c)).catch(c=>(r.error=c,r.checked=Date.now(),r.data)).finally(()=>{r.inflight=null,r.subs.forEach(c=>c())}),r.inflight)}function Ab(u){const s=Yf(u);return s.error&&!s.data&&!s.inflight&&(s.error=null,s.subs.forEach(r=>r())),bc(u,!0)}function Tc(u,s=3e4){const[,r]=b.useState(0);b.useEffect(()=>{if(!u)return;const o=Yf(u),d=()=>r(y=>y+1);o.subs.add(d),s&&(!o.ms||s<o.ms)&&(o.ms=s,clearInterval(o.timer),o.timer=setInterval(()=>{o.subs.size&&bc(u,!0)},s)),bc(u);const v=()=>{document.hidden||bc(u)};return document.addEventListener("visibilitychange",v),()=>{o.subs.delete(d),document.removeEventListener("visibilitychange",v),o.subs.size||(clearInterval(o.timer),o.timer=null,o.ms=0)}},[u,s]);const c=u?Sc.get(u):null;return{data:(c==null?void 0:c.data)??null,error:(c==null?void 0:c.error)??null,loading:!!u&&!(c!=null&&c.data)&&!(c!=null&&c.error),at:(c==null?void 0:c.at)||null,checked:(c==null?void 0:c.checked)||null}}function Ob(u=1e3){const[s,r]=b.useState(Date.now());return b.useEffect(()=>{const c=setInterval(()=>r(Date.now()),u);return()=>clearInterval(c)},[u]),s}const rc=new Map,By=u=>(rc.has(u)||rc.set(u,qf(u).catch(s=>{throw rc.delete(u),s})),rc.get(u));function zv(u,{birth:s=!0,poll:r=2e4}={}){const[c,o]=b.useState(null),[d,v]=b.useState(null),[y,g]=b.useState(null);b.useEffect(()=>{if(o(null),v(null),g(null),!u||!s)return;let D=!0;return By(`/api/pie?op=birth&mint=${u}`).then(Y=>{if(D&&(o(Y),(Y==null?void 0:Y.status)==="read"))return By(`/api/pie?op=links&mint=${u}`).then(q=>D&&v(q))}).catch(Y=>D&&g(Y)),()=>{D=!1}},[u,s]);const S=Tc(u?`/api/pie?op=live&mint=${u}`:null,r),x=b.useMemo(()=>S.data&&(c==null?void 0:c.status)==="read"?Tv(S.data,c,d):[],[S.data,c,d]),T=Tc(u&&x.length?`/api/pie?op=live&mint=${u}&watch=${x.join(",")}`:null,r).data||S.data,C=b.useMemo(()=>T?vb(T,(c==null?void 0:c.status)==="read"?c:null,d):null,[T,c,d]);return{live:T,birth:c,links:d,pie:C,loading:!T&&!S.error,error:T?null:S.error,birthState:s?y?"error":c?c.status:"reading":"off",read:(T==null?void 0:T.read)||null}}function _b(u){b.useEffect(()=>{const s=document.title;return document.title=u?`${u}, piexpad`:"piexpad, every coin's whole pie",()=>{document.title=s}},[u])}const Ri=[["born","Just born","Under 20 minutes old, under a quarter of the curve sold"],["climbing","Climbing","A quarter to 85% of the curve sold"],["almost","Almost graduated","85% or more sold, the pool is close"],["graduated","Graduated","Curve sold out, trading in pump.fun's pool"]],Cb=[["all","Every coin"],["clean","Creator < 5%"],["sol","SOL pairs"],["nomayhem","No Mayhem"]],Db=u=>u.currentTarget.scrollIntoView({block:"nearest",inline:"nearest"}),jv=u=>String(u).replace(/pump$/,"").slice(-4);function Mv(u){const s=c=>String(c.symbol||"").toUpperCase(),r=new Map;for(const c of u)r.has(s(c))||r.set(s(c),new Set),r.get(s(c)).add(c.mint);return new Set(u.filter(c=>r.get(s(c)).size>1).map(c=>c.mint))}function Rv({c:u,preview:s=!1,twins:r}){const c=[{key:"held",pct:u.pie.held},{key:"creator",pct:u.pie.creator||0},{key:"rest",pct:u.pie.rest}],o=s?"div":Nt,d=u.progress==null?"—":`${Math.round(u.progress*100)}%`;return h.jsxs(o,{...s?{}:{to:`/coin/${u.mint}`},className:`coin-key${s?" is-preview":""}`,title:`$${u.symbol}: not in a wallet ${Fa(u.pie.held)}, creator's wallet ${u.pie.creator==null?"unknown":Fa(u.pie.creator)}, everyone else ${Fa(u.pie.rest)}`,children:[h.jsxs("span",{className:"ck-top",children:[h.jsx(ga,{src:u.image,symbol:u.symbol,size:"sm"}),h.jsxs("b",{children:["$",u.symbol]}),(r==null?void 0:r.has(u.mint))&&h.jsx("span",{className:"ck-tail",children:jv(u.mint)}),u.mayhem&&h.jsx("span",{className:"tag ink ck-tag",children:"Mayhem"})]}),h.jsxs("span",{className:"ck-bot",children:[h.jsx("span",{className:"ck-pie",children:h.jsx(ju,{slices:c,tone:"paper",labels:"none",rough:!1,size:44,open:["held"],ghost:!1})}),h.jsxs("span",{className:"ck-nums",children:[h.jsx("span",{children:Di(u.mcapUsd)}),h.jsx("span",{className:"small",children:s?`${d} of the curve sold`:`${u.phase==="graduated"?"pool":`${d} sold`} · ${Wa(u.createdAt)}`})]})]})]})}const Ly={born:"just born",climbing:"climbing",almost:"almost graduated",graduated:"graduated"};function Ub(u){const s=Ri.reduce((o,[d])=>o+u[d].length,0),r=Ri.filter(([o])=>u[o].length).map(([o])=>`${u[o].length} ${Ly[o]}`),c=Ri.filter(([o])=>!u[o].length).map(([o])=>Ly[o]);return{total:s,more:`${r.length?`: ${r.join(", ")}`:""}${c.length?`; none ${c.join(" or ")} this minute`:""}`}}function Hb(){const[u,s]=b.useState(4);return[b.useCallback(c=>{if(!c||typeof ResizeObserver>"u")return;const o=new ResizeObserver(([d])=>s(innerWidth<=720?10:Math.max(1,Math.floor((d.contentRect.width-112)/224))));return o.observe(c),()=>o.disconnect()},[]),u]}function Bb({rows:u}){const[s,r]=Hb(),c=u?Ri.filter(([v])=>u[v].length):Ri,o=u?Ub(u):null,d=u?Mv(c.flatMap(([v])=>u[v].slice(0,r))):null;return h.jsx("section",{className:"kb-sec",children:h.jsxs("div",{className:"wrap",children:[h.jsxs("div",{className:"sec-head",children:[h.jsxs("div",{children:[h.jsx("div",{className:"label",children:"The board"}),h.jsx("h2",{className:"h2",children:"pump.fun's newest and most traded coins, as keys."})]}),h.jsx("p",{className:"lede",children:"Each key is a coin with its own small pie: what no wallet holds (its curve, pool or Mayhem agent) left open, the creator's own wallet pulled out in red, and every other wallet in ink."})]}),h.jsxs("div",{className:"kb plate","data-ground":"ink",children:[o&&h.jsx("span",{className:"tag seam-tag",children:h.jsxs("span",{children:[o.total," coins",h.jsx("span",{className:"tag-more",children:o.more})]})}),h.jsx("nav",{className:"kb-head","aria-label":"Open the board with a filter",children:h.jsx("div",{className:"kb-filters",children:Cb.map(([v,y])=>h.jsx(Nt,{to:v==="all"?"/board":`/board?f=${v}`,className:`filter-key${v==="all"?" is-on":""}`,onFocus:Db,children:y},v))})}),h.jsxs("div",{className:"kb-main",children:[c.map(([v,y,g],S)=>h.jsxs("div",{className:"kb-row",children:[h.jsxs("div",{className:"kb-row-label",children:[h.jsxs("b",{children:[y," ",h.jsx("span",{className:"kb-count",children:u?u[v].length:"—"})]}),h.jsx("span",{className:"small",children:g})]}),h.jsxs("div",{className:"kb-keys",ref:S===0?s:void 0,children:[u?u[v].slice(0,r).map(x=>h.jsx(Rv,{c:x,twins:d},x.mint)):[0,1,2,3].map(x=>h.jsx(bu,{w:"212px",h:96,r:20},x)),u&&u[v].length>r&&h.jsxs(Nt,{to:`/board#row-${v}`,className:"more-key",children:["+",u[v].length-r," more"]})]})]},v)),u&&!c.length&&h.jsx("p",{className:"small kb-empty",children:"No coin on the board this minute; it reads again in 8 seconds."})]}),h.jsx(Hl,{to:"/launch",primary:!0,size:"lg",children:"Launch a coin"})]})]})})}const Lb=[0,.1,.5,1,2,5];function qb(){const u=Tc("/api/launch?op=terms",6e4).data,[s,r]=b.useState(1),[c,o]=b.useState(null);b.useEffect(()=>{let y=!0;return qf(`/api/launch?op=quote&sol=${s}`).then(g=>y&&o(g)).catch(()=>y&&o(null)),()=>{y=!1}},[s]);const d=(c==null?void 0:c.pct)??0,v=[{key:"creator",pct:d},{key:"held",pct:100-d}];return h.jsx("section",{className:"lp-sec",children:h.jsxs("div",{className:"wrap",children:[h.jsxs("div",{className:"sec-head",children:[h.jsxs("div",{children:[h.jsx("div",{className:"label",children:"Drive A · pump.fun"}),h.jsx("h2",{className:"h2",children:"Launch with your slice on the table."})]}),h.jsx("p",{className:"lede",children:"The create and your dev buy go out in one transaction, so your buy is always the coin's first trade and its size is exact. Buyers see it as the slice pulled out of your pie."})]}),h.jsxs("div",{className:"lp-preview plate",children:[h.jsxs("div",{className:"lp-cols",children:[h.jsxs("div",{className:"lp-key",children:[h.jsx("div",{className:"label",children:"Your key on the board"}),h.jsx(Rv,{c:{mint:"preview",symbol:"YOURS",name:"",image:null,mcapUsd:null,phase:"curve",progress:s?c&&(u!=null&&u.curveTokens)?c.tokens/u.curveTokens:null:0,createdAt:Date.now(),pie:{held:100-d,creator:d,rest:0}},preview:!0})]}),h.jsxs("div",{className:"lp-buy",children:[h.jsx("div",{className:"label",children:"Dev buy"}),h.jsxs("div",{className:"fig lp-sol",children:[s," SOL"]}),h.jsx("div",{className:"lp-pad",role:"group","aria-label":"Dev buy in SOL",children:Lb.map(y=>h.jsx("button",{type:"button",className:`pad-btn${y===s?" on":""}`,"aria-pressed":y===s,onClick:()=>r(y),children:y},y))})]}),h.jsxs("div",{className:"lp-pie",children:[h.jsx(ju,{slices:v,tone:"ink",labels:"none",open:["held"],title:`The dev buy as the creator's slice: ${d.toFixed(2)}% of the supply`}),h.jsxs("div",{className:"lp-legend",children:[h.jsxs("div",{children:[h.jsx(Ev,{size:16})," Creator side · yours ",h.jsx("b",{className:"fig",children:Fa(d)})]}),h.jsx("p",{className:"small",children:s?`${s} SOL buys ${c?Math.round(c.tokens).toLocaleString("en-US"):"…"} tokens at creation, before anyone else can.`:"No dev buy: the curve opens with every token for sale."}),h.jsxs("div",{className:"small",children:["The rest sits on the curve: ",Fa(100-d),", of which 20.7% is kept for the pool."]})]})]})]}),h.jsxs("div",{className:"lp-foot",children:[h.jsxs("ol",{className:"lp-steps","aria-label":"How a launch goes",children:[h.jsxs("li",{children:[h.jsx("b",{children:"1"}),"Details to Arweave"]}),h.jsxs("li",{children:[h.jsx("b",{children:"2"}),"One transaction, dry run first"]}),h.jsxs("li",{children:[h.jsx("b",{children:"3"}),"One wallet prompt"]}),h.jsxs("li",{children:[h.jsx("b",{children:"4"}),"The pie at birth"]})]}),h.jsx(Hl,{to:"/launch",primary:!0,size:"lg",children:"Launch a coin"})]}),h.jsx("div",{className:"lp-terms small",children:h.jsxs("span",{children:[h.jsx(ga,{symbol:"A",size:"sm"})," pump.fun fees on every trade: ",u&&Number.isFinite(u.protocolFeeBps)&&Number.isFinite(u.creatorFeeBps)?`${(u.protocolFeeBps/100).toFixed(2)}% protocol, ${(u.creatorFeeBps/100).toFixed(2)}% to the creator`:"read from pump.fun",". piexpad adds nothing, holds no key and never signs for you."]})})]})]})})}const Yb=1200,Gb=600,oc=600,fc=300,gu=168,Sf=300,qy=120,Yy=14,Xb=u=>40+Math.ceil(u.length/44)*19,Vb=u=>u*Math.PI/180;function Qb({pie:u,coin:s,birth:r}){const c=u.slices.map(S=>({key:S.key,pct:S.pct})),o=wv(c,"creator",r),d=Ac(c),v=Ui.map((S,x)=>{var H;const p=o.find(Q=>Q.key===S.key)||{key:S.key,mid:0,hollow:!1},[T,C]=bb(p,oc,fc,gu),D=(H=u.slices.find(Q=>Q.key===S.key))==null?void 0:H.pct,Y=Math.cos(Vb(p.mid))>=0,q=!p.hollow&&!(D>0);return{...S,n:x+1,ax:T,ay:C,h:Xb(S.rule),right:Y,pct:D,empty:q,order:C+(q?Y?30:-30:0)}});for(const S of[!0,!1]){const x=v.filter(C=>C.right===S).sort((C,D)=>C.order-D.order),p=x.reduce((C,D)=>C+D.h,0)+(x.length-1)*Yy;let T=Math.max(10,Math.min(Gb-10-p,x.reduce((C,D)=>C+D.ay,0)/(x.length||1)-p/2));for(const C of x)C.by=T,T+=C.h+Yy}const y=Math.min(fc-gu-8,...v.map(S=>S.by))-8,g=Math.max(fc+gu+8,...v.map(S=>S.by+S.h))+8;return h.jsxs("svg",{className:"rules-figure",viewBox:`0 ${y} ${Yb} ${g-y}`,role:"img","aria-label":`The five rules, drawn on $${(s==null?void 0:s.symbol)||"the coin"}'s pie`,children:[h.jsx(ju,{bare:!0,slices:c,birth:r,cx:oc,cy:fc,r:gu,tone:"paper",labels:"none",open:["held"]}),v.map(S=>{const x=S.right?oc+gu+qy:oc-gu-qy-Sf,p=S.right?x:x+Sf,T=S.by+22;return h.jsxs("g",{children:[!S.empty&&h.jsx("polyline",{points:`${S.ax},${S.ay} ${S.right?Math.min(p-8,Math.max(p-28,S.ax+8)):Math.max(p+8,Math.min(p+28,S.ax-8))},${T} ${p},${T}`,fill:"none",stroke:"var(--ink)",strokeWidth:"2",strokeLinejoin:"round"}),!S.empty&&h.jsx("circle",{cx:S.ax,cy:S.ay,r:"4.5",fill:"var(--ink)"}),h.jsx("foreignObject",{x,y:S.by,width:Sf,height:S.h,children:h.jsxs("div",{className:`rule-note${S.right?"":" left"}`,children:[h.jsxs("div",{className:"rule-top",children:[h.jsx("span",{className:"rule-n",children:S.n}),h.jsx("b",{children:S.label}),h.jsx("span",{className:"rule-pct",children:S.pct>0?d[S.key]:S.pct===0?"0%":Fa(S.pct)})]}),h.jsx("p",{children:S.rule})]})})]},S.key)})]})}function Zb({pieState:u,coin:s}){var c,o,d;const r=u==null?void 0:u.pie;return h.jsx("section",{className:"rules-sec",id:"rules",children:h.jsxs("div",{className:"wrap",children:[h.jsxs("div",{className:"sec-head",children:[h.jsxs("div",{children:[h.jsx("div",{className:"label",children:"How a pie is cut"}),h.jsx("h2",{className:"h2",children:"Five rules, printed under every pie."})]}),h.jsx("p",{className:"lede",children:"Each wallet is counted once, in the first slice whose rule it meets. A wallet is not a person and an early buy is not proof of a bundle: the pie shows what Solana shows, and the docs say what it cannot see."})]}),r&&h.jsxs("figure",{className:"rules-fig",children:[h.jsx(Qb,{pie:r,coin:s,birth:((c=u.birth)==null?void 0:c.status)==="read"?u.birth.devBuy/(((d=(o=u.live)==null?void 0:o.token)==null?void 0:d.supply)||1e9)*100:null}),h.jsxs("figcaption",{className:"small",children:["Drawn on $",(s==null?void 0:s.symbol)||"the coin on the screen","'s pie, read ",u.read?Hf(u.read):"—"," from Solana."]})]}),h.jsx("ol",{className:`rules${r?" rules-phone":""}`,children:Ui.map((v,y)=>h.jsxs("li",{className:"rule-card",children:[h.jsx(Oc,{on:v.key,size:40}),h.jsx("div",{className:"rule-n small",children:y+1}),h.jsx("h3",{className:"h3",children:v.label}),h.jsx("p",{children:v.rule})]},v.key))}),h.jsxs("p",{className:"small rules-more",children:["The programs behind each launch, what they enforce and what nothing enforces are in the ",h.jsx(Nt,{className:"link",to:"/docs",children:"docs"}),"."]})]})})}const kb=/^[1-9A-HJ-NP-Za-km-z]{32,44}$/;function Kb(u){if(!u)return[];const s=new Set,r=[];for(const c of[...u.born,...u.climbing,...u.almost,...u.graduated])s.has(c.mint)||(s.add(c.mint),r.push(c));return r}function $b(u){const s=`(max-width: ${u}px)`,[r,c]=b.useState(()=>typeof matchMedia<"u"&&matchMedia(s).matches);return b.useEffect(()=>{const o=matchMedia(s),d=()=>c(o.matches);return d(),o.addEventListener("change",d),()=>o.removeEventListener("change",d)},[s]),r}function Av({big:u,onRead:s,prompt:r}){const c=wc(),[o,d]=b.useState(""),[v,y]=b.useState(!1),g=S=>{S.preventDefault();const x=o.trim();if(!kb.test(x)){y(!0);return}s?s(x):c(`/pie/${x}`)};return h.jsxs("form",{className:`field mint-field${v?" invalid":""}${u?" big":""}`,onSubmit:g,role:"search",children:[h.jsx("label",{className:"sr",htmlFor:u?"mint-big":"mint",children:"Any Solana mint address"}),h.jsx("input",{id:u?"mint-big":"mint",value:o,onChange:S=>{d(S.target.value),y(!1)},placeholder:r||(u?"Paste any mint to read its pie":"Paste a mint"),spellCheck:"false",autoComplete:"off"}),h.jsx("button",{type:"submit",className:"key sm",children:"Read"}),v&&h.jsx("span",{className:"field-err",role:"alert",children:"Not a Solana mint: 32 to 44 letters and digits, without 0, O, I or l."})]})}function Jb({coin:u,pieState:s,kind:r="featured",rule:c=null,onBack:o,taking:d=null,next:v=null,replay:y=!1}){const g=d||v;return h.jsxs("figcaption",{className:"onscreen",children:[h.jsx(Wb,{coin:u,pieState:s,kind:r,rule:c,onBack:o,replay:y,off:!!d}),g&&h.jsx(Fb,{b:g,coin:u,off:!d})]})}function Fb({b:u,coin:s,off:r}){var v,y,g;const c=[{key:"creator",pct:((v=u.pie)==null?void 0:v.creator)||0},{key:"held",pct:((y=u.pie)==null?void 0:y.held)||0},{key:"rest",pct:((g=u.pie)==null?void 0:g.rest)||0}],o=Ac(c),d={creator:"Creator's wallet",held:"Not in a wallet",rest:"Everyone else"};return h.jsxs("div",{className:"onscreen-face","aria-hidden":r||void 0,children:[h.jsxs("div",{className:"onscreen-coin",children:[h.jsx(ga,{src:u.image,symbol:u.symbol}),h.jsxs("span",{children:[h.jsxs("b",{children:["$",u.symbol]}),h.jsxs("span",{className:"small",children:["Just born on pump.fun · ",Wa(u.createdAt)," old · ",Di(u.mcapUsd)]})]})]}),h.jsxs("p",{className:"onscreen-story",children:["Its creator's own wallet still holds ",o.creator||"0%"," of it. Its first slots and the wallets its creator funded are read on its page."]}),h.jsx("ul",{className:"onscreen-legend","aria-label":"Its slices, the creator's wallet first",children:c.filter(S=>S.key==="creator"||S.pct>0).map(S=>h.jsxs("li",{className:S.key==="creator"?"is-creator":"",children:[h.jsx(Oc,{on:S.key,size:16}),h.jsx("span",{children:d[S.key]}),h.jsx("b",{children:S.pct>0?o[S.key]:"0%"})]},S.key))}),h.jsxs("p",{className:"small onscreen-foot",children:[h.jsxs(Nt,{className:"link",to:`/coin/${u.mint}`,children:["Open $",u.symbol]}),s!=null&&s.symbol?h.jsxs(h.Fragment,{children:[" · $",s.symbol," comes back to the screen in a moment"]}):null]})]})}function Wb({coin:u,pieState:s,kind:r,rule:c,onBack:o,replay:d,off:v}){var Se,Ye,Ze;const{pie:y,birth:g,birthState:S,read:x,live:p,links:T,error:C}=s,D="onscreen-face",Y=v||void 0;if(r==="read"&&C&&!p)return h.jsxs("div",{className:D,role:"alert","aria-hidden":Y,children:[h.jsx("b",{children:"That mint could not be read."}),h.jsxs("p",{className:"onscreen-story",children:[C.message,!(C.status>=400&&C.status<500)&&" The screen reads it again on its own every 20 s."]}),h.jsx("p",{className:"small onscreen-foot",children:h.jsx("button",{type:"button",className:"link",onClick:o,children:"Back to the featured coin"})})]});if(!u)return h.jsxs("div",{className:D,"aria-busy":"true","aria-hidden":Y,children:[h.jsx(bu,{h:32,w:"60%"}),h.jsx(bu,{h:18,w:"90%"}),h.jsx(bu,{h:18,w:"70%"}),r==="read"&&h.jsx("p",{className:"small onscreen-foot",children:h.jsx("button",{type:"button",className:"link",onClick:o,children:"Back to the featured coin"})})]});const q=y==null?void 0:y.slices.find(he=>he.key==="creator"),H=y==null?void 0:y.slices.find(he=>he.key==="early"),Q=(g==null?void 0:g.status)==="read"&&((Se=p==null?void 0:p.token)!=null&&Se.supply)?g.devBuy/p.token.supply*100:null,V=y?(q==null?void 0:q.pct)??0:null,U=y?Ac(y.slices.map(he=>({key:he.key,pct:he.pct}))):null,X=((Ye=T==null?void 0:T.links)==null?void 0:Ye.length)||0,ee=V==null?".":V<.005?" and has sold all of it.":` and holds ${U.creator} now.`,Z=S==="read"&&Q!=null?[Q>.05?`Its creator bought ${Fa(Q)} at birth${ee}`:`Its creator bought nothing at birth${V>=.005?` and holds ${U.creator} now`:""}.`,X?`${X} wallet${X===1?"":"s"} it funded ${X===1?"sits":"sit"} on the creator side.`:y&&H&&!(H.pct>0)?"No first-slot buyer outside it still holds.":""].filter(Boolean).join(" "):S==="too-busy"?"Too busy since its birth to read its first slots. The live slices still hold.":"Reading its birth from Solana: the create and every buy in its first three slots.",le=y?[y.slices.find(he=>he.key==="creator"),...y.slices.filter(he=>he.key!=="creator"&&he.pct>0)].filter(Boolean):[];return h.jsxs("div",{className:D,"aria-hidden":Y,children:[h.jsxs("div",{className:"onscreen-coin",children:[h.jsx(ga,{src:u.image,symbol:u.symbol}),h.jsxs("span",{children:[h.jsx("b",{children:u.symbol?`$${u.symbol}`:"This coin"}),h.jsxs("span",{className:"small",children:[r==="read"?"Your read":"Featured"," · ",Di(u.mcapUsd),u.createdAt?` · ${Wa(u.createdAt)} old`:""," · ",bv(((Ze=p==null?void 0:p.totals)==null?void 0:Ze.wallets)??u.holders)," holders · ",h.jsxs("span",{className:"nowrap",children:["read ",x?Hf(x):"—"]})]})]})]}),h.jsxs("div",{className:"onscreen-say",children:[h.jsx("p",{className:"onscreen-story","aria-hidden":d||void 0,children:Z}),h.jsx("p",{className:"onscreen-story","aria-hidden":!d||void 0,children:"On the screen: its pie at birth, then what is left of it."})]}),y?h.jsx("ul",{className:"onscreen-legend","aria-label":"Its slices, the creator side first",children:le.map(he=>h.jsxs("li",{className:he.key==="creator"?"is-creator":"",children:[h.jsx(Oc,{on:he.key,size:16}),h.jsx("span",{children:he.label}),h.jsx("b",{children:he.pct>0?U[he.key]:"0%"}),he.key==="creator"&&Q>.05&&h.jsxs("span",{className:"small",children:["bought ",Fa(Q)," at birth"]})]},he.key))}):h.jsx(bu,{h:24,w:"80%"}),h.jsx("p",{className:"small onscreen-foot",children:r==="read"?h.jsxs(h.Fragment,{children:[h.jsx(Nt,{className:"link",to:`/pie/${u.mint}`,children:"Open its page"})," · ",h.jsx("button",{type:"button",className:"link",onClick:o,children:"Back to the featured coin"})]}):h.jsxs(h.Fragment,{children:[c||"The most traded pump.fun coin in SOL under 6 h old with 20+ holders."," ",h.jsx(Nt,{className:"link",to:`/pie/${u.mint}`,children:"Every wallet in every slice"})]})})]})}function Gy({drive:u,ev:s,now:r}){return h.jsxs("div",{className:`drive-side drive-${u.toLowerCase()}`,children:[u==="A"&&h.jsx("span",{className:"sr","aria-live":"polite",children:s?`Just born on pump.fun: $${s.symbol}`:""}),h.jsx("span",{className:"drive-lead","aria-hidden":"true"},`l${(s==null?void 0:s.mint)||""}`),h.jsx("span",{className:"m-note-n","aria-hidden":"true",children:u}),h.jsxs("span",{className:"m-note-t drive-print",children:[h.jsx("span",{className:"m-note-k",children:u==="A"?"Just born on pump.fun":"Just born on Meteora's curve"}),s?h.jsxs(Nt,{to:`/coin/${s.mint}`,className:"m-note-c",children:[h.jsx(ga,{src:s.image,symbol:s.symbol,size:"sm"}),h.jsxs("b",{children:["$",s.symbol]}),h.jsxs("span",{children:[Wa(s.createdAt,r)," ago"]})]}):h.jsx(Nt,{to:"/launch",className:"m-note-c link",children:u==="A"?"Launch one on pump.fun":"Launch one under piexpad's rules"})]},(s==null?void 0:s.mint)||"none")]})}function Ib({coins:u}){const s=u.filter(o=>o.mcapUsd&&!o.lookalike&&!o.hidden).slice(0,24),r=Mv(s);if(!s.length)return h.jsx("div",{className:"tape","aria-hidden":"true",children:h.jsxs("div",{className:"base-line",children:[h.jsx("i",{}),h.jsx("i",{})]})});const c=(o,d)=>{var v;return h.jsxs(Nt,{to:`/coin/${o.mint}`,className:"tape-item",tabIndex:-1,"aria-hidden":d>=100||void 0,children:[h.jsx(ga,{src:o.image,symbol:o.symbol,size:"sm"}),h.jsxs("b",{children:["$",o.symbol]}),r.has(o.mint)&&h.jsx("span",{className:"tape-tail",children:jv(o.mint)}),h.jsx("span",{children:Di(o.mcapUsd)}),((v=o.change)==null?void 0:v.h1)!=null&&h.jsxs("span",{className:"tape-ch",children:[o.createdAt&&Date.now()-o.createdAt<36e5?"since birth":"1h"," ",o.change.h1>=0?"▲":"▼"," ",eb(o.change.h1)]})]},o.mint+d)};return h.jsx("div",{className:"tape",children:h.jsx("div",{className:"tape-rail","aria-label":"Coins trading now",children:h.jsxs("div",{className:"tape-run",children:[s.map(c),s.map((o,d)=>c(o,d+100))]})})})}function Pb(){var Ce,Te,dt,se,Dt,w,G,I,W,pe,fe;_b("");const u=wc(),s=Tc("/api/board",8e3),r=(Ce=s.data)==null?void 0:Ce.rows,c=b.useMemo(()=>Kb(r),[r]),o=((Te=s.data)==null?void 0:Te.featured)||null,[d,v]=b.useState(null),y=(d==null?void 0:d.mint)||o,g=zv(y),S=(dt=g.live)==null?void 0:dt.index,x=S&&y?{mint:y,symbol:S.symbol,image:S.image,mcapUsd:S.mcap,createdAt:S.createdAt,holders:S.holders}:null,p=c.find(ne=>ne.mint===y)||x,T=ne=>v($=>({mint:ne,n:(($==null?void 0:$.n)||0)+1})),[C,D]=b.useState(null),[Y,q]=b.useState(!1),H=$b(400),Q=b.useRef(null),[V,U]=b.useState(0);b.useEffect(()=>{if(!r)return;const ne=r.born.map($=>$.mint);if(Q.current){const $=ne.filter(J=>!Q.current.has(J)).length;for(let J=0;J<Math.min($,8);J++)setTimeout(()=>U(Fe=>Fe+1),J*420)}Q.current=new Set([...Q.current||[],...ne])},[r]);const X=b.useRef(null),[ee,Z]=b.useState(0);b.useEffect(()=>{var $;const ne=($=s.data)==null?void 0:$.bornB;if(ne){if(X.current){const J=ne.filter(Fe=>!X.current.has(Fe.mint)).length;for(let Fe=0;Fe<Math.min(J,4);Fe++)setTimeout(()=>Z(nt=>nt+1),Fe*420)}X.current=new Set([...X.current||[],...ne.map(J=>J.mint)])}},[(se=s.data)==null?void 0:se.bornB]);const le=g.read?Date.parse(g.read):0,Se=Ob(1e3),Ye=((w=(Dt=g.live)==null?void 0:Dt.token)==null?void 0:w.supply)||1e9,Ze=((G=g.birth)==null?void 0:G.status)==="read"?g.birth.devBuy/Ye*100:null,he=((I=r==null?void 0:r.born)==null?void 0:I[0])||null,rt=he?{mint:he.mint,symbol:he.symbol,image:he.image,age:Wa(he.createdAt,Se)}:null,lt=b.useMemo(()=>c.slice(0,50).map(ne=>{var $,J;return{...ne,stamp:`${(J=($=ne.progress)==null?void 0:$.toFixed)==null?void 0:J.call($,5)}|${Math.round(ne.mcapUsd||0)}`}}),[c]),Re=b.useRef(null),k=b.useRef(null),[oe,ie]=b.useState(null);return b.useEffect(()=>{if(!r)return;const ne=r.born.filter(J=>{var Fe;return(((Fe=J.pie)==null?void 0:Fe.creator)??0)>=3&&!J.hidden&&!J.lookalike}),$=k.current?ne.find(J=>!k.current.has(J.mint)):ne[0];k.current=new Set([...k.current||[],...r.born.map(J=>J.mint)]),$&&ie($)},[r]),h.jsxs(h.Fragment,{children:[h.jsxs("section",{className:"hero",ref:Re,children:[h.jsx(Ib,{coins:c.filter(ne=>ne.phase==="graduated"||ne.progress>=.25)}),s.error&&!r&&h.jsx("div",{className:"wrap",children:h.jsx(Bf,{kind:"error",title:"The board did not answer.",retry:()=>Ab("/api/board"),children:"Solana or the token index is slow right now. The page reads again on its own every few seconds."})}),h.jsx("div",{className:"hero-stack",children:h.jsxs("div",{className:"hero-copy",children:[h.jsx("div",{className:"label",children:"A launchpad on Solana"}),h.jsx("h1",{className:"display",children:"See the whole pie before you buy."}),h.jsxs("div",{className:"hero-ctl",children:[h.jsx(Av,{onRead:T,prompt:H?"Paste a mint":"Paste any mint to print its pie"}),h.jsx(Hl,{to:"/launch",primary:!0,size:"lg",children:"Launch a coin"})]}),h.jsxs("div",{className:"hero-ca small",children:[h.jsxs("b",{children:["$",Pl.ticker]}),h.jsx(Rc,{value:Pl.mint,full:!H}),h.jsx("a",{className:"link",href:xv(Pl.mint),target:"_blank",rel:"noreferrer",children:Pl.venue}),Pl.mint.includes(" ")?h.jsx("a",{className:"link",href:xv(Pl.mint),target:"_blank",rel:"noreferrer",children:"Buy on pump.fun"}):h.jsx(Nt,{className:"link",to:`/coin/${Pl.mint}`,children:"Its own pie"})]})]})}),h.jsxs("figure",{className:"hero-figure",children:[h.jsx("div",{className:"hero-object",children:h.jsx(Rb,{pie:g.pie,coin:p,birthPct:Ze,born:d?null:oe,typing:d?{text:d.mint.slice(0,4),n:d.n}:null,tag:d?"Your read":null,error:d&&g.error&&!g.live?g.error.message:null,onTake:D,onReplay:q,keys:lt,ledA:V,ledB:ee,reads:le,onKey:ne=>u(`/coin/${ne.mint}`),eventA:C?{mint:C.mint,symbol:C.symbol,image:C.image,age:Wa(C.createdAt,Se)}:rt})}),h.jsxs("div",{className:"hero-drives",children:[h.jsx(Gy,{drive:"A",ev:C||he,now:Se}),h.jsx(Gy,{drive:"B",ev:((pe=(W=s.data)==null?void 0:W.bornB)==null?void 0:pe[0])||null,now:Se})]}),h.jsx(Jb,{coin:p,pieState:g,kind:d?"read":"featured",rule:(fe=s.data)==null?void 0:fe.featuredRule,onBack:()=>v(null),taking:C,next:oe,replay:Y})]})]}),h.jsx(tE,{rows:r,coins:c,featured:o}),h.jsx(Bb,{rows:r}),h.jsx(qb,{}),h.jsx(Zb,{pieState:g,coin:p})]})}function eE(u){b.useEffect(()=>{let s=0;const r=()=>{s=0;const o=u.current;if(!o)return;const d=o.getBoundingClientRect().top,v=innerHeight,y=Math.min(1,Math.max(0,(.75*v-d)/(.6*v))),g=matchMedia("(prefers-reduced-motion: reduce)").matches;o.style.setProperty("--grow",(g?1:y*y*(3-2*y)).toFixed(4)),o.toggleAttribute("data-let",g||y>.3)},c=()=>{s||(s=requestAnimationFrame(r))};return r(),addEventListener("scroll",c,{passive:!0}),addEventListener("resize",c),()=>{removeEventListener("scroll",c),removeEventListener("resize",c),cancelAnimationFrame(s)}},[u])}function tE({rows:u,coins:s,featured:r}){var H,Q,V,U;const c=b.useRef(null);eE(c);const[o,d]=b.useState(null),[v,y]=b.useState([]),g=b.useRef(0);b.useEffect(()=>{if(!u||g.current&&Date.now()-g.current<6e4)return;const X=Date.now()-36e5,ee=[...u.born,...u.climbing,...u.almost].filter(Z=>{var le;return Z.mint!==r&&!Z.hidden&&!Z.lookalike&&Z.quote==="SOL"&&Z.createdAt>=X&&(((le=Z.pie)==null?void 0:le.creator)??0)>0}).sort((Z,le)=>le.pie.creator-Z.pie.creator).slice(0,3);ee.length&&(g.current=Date.now(),y(ee))},[u,r]);const[S,x]=b.useState(null),p=(S==null?void 0:S.mint)||((H=v[0])==null?void 0:H.mint)||r,T=S||v.find(X=>X.mint===p)||s.find(X=>X.mint===p)||null,C=zv(p),D=C.pie,Y=((V=(Q=C.live)==null?void 0:Q.token)==null?void 0:V.supply)||1e9,q=((U=C.birth)==null?void 0:U.status)==="read"?C.birth.devBuy/Y*100:null;return h.jsx("section",{className:"reader-sec",ref:c,"data-ground":"ink",children:h.jsxs("div",{className:"screen-plate ink-ground",children:[h.jsx("img",{className:"seam-head",src:"/art/head-peek.webp",alt:"","aria-hidden":"true"}),h.jsx("img",{className:"seam-hand",src:"/art/hand-top.webp",alt:"","aria-hidden":"true"}),h.jsxs("div",{className:"wrap reader-grid",children:[h.jsxs("div",{className:"reader-copy",children:[h.jsx("div",{className:"label",children:"The screen, up close"}),h.jsx("h2",{className:"h2",children:"Read any coin's whole pie."}),h.jsx("p",{className:"lede",children:"Five slices in a fixed order, each wallet counted once, the creator's side always pulled out. Paste any mint on Solana, launched here or not."}),h.jsx(Av,{big:!0}),v.length>0&&h.jsxs("div",{className:"reader-picks",children:[h.jsx("span",{className:"small",children:"Picked from the last hour's births still on the board: the biggest creator wallets at a read in the last minute."}),h.jsx("div",{className:"chips",role:"group","aria-label":"Coins to read",children:v.map(X=>h.jsxs("button",{type:"button",className:"coin-chip","aria-pressed":X.mint===p,onClick:()=>x(X),children:[h.jsx(ga,{src:X.image,symbol:X.symbol,size:"sm"}),h.jsxs("b",{children:["$",X.symbol]}),h.jsxs("span",{children:[Wa(X.createdAt)," old"]})]},X.mint))})]}),h.jsx("ul",{className:"legend",children:(()=>{const X=D?Ac(D.slices.map(ee=>({key:ee.key,pct:ee.pct}))):{};return Ui.map(ee=>{var Ze,he;const Z=D==null?void 0:D.slices.find(rt=>rt.key===ee.key),le=(he=(Ze=C.live)==null?void 0:Ze.totals)==null?void 0:he.wallets,Se=Z?ee.key==="rest"?le==null?null:Math.max(0,le-D.slices.reduce((rt,lt)=>rt+(lt.key!=="held"&&lt.key!=="rest"?lt.members.length:0),0)):Z.members.length:null,Ye=ee.key==="early"&&C.birthState!=="read";return h.jsxs("li",{className:o===ee.key?"on":"",onMouseEnter:()=>d(ee.key),onMouseLeave:()=>d(null),children:[h.jsxs("span",{className:"lg-name",children:[h.jsx(Oc,{on:ee.key,size:18,light:!0}),ee.label]}),h.jsx("span",{className:"small lg-count",children:Ye?C.birthState==="too-busy"?"birth not read":"reading the birth":Se==null?"":`${bv(Se)} ${ee.key==="held"?Se===1?"account":"accounts":Se===1?"wallet":"wallets"}`}),h.jsx("span",{className:"fig",children:Ye?"—":Z?Z.pct>0?X[ee.key]:"0%":"—"})]},ee.key)})})()})]}),h.jsxs("div",{className:"reader-pie",children:[D?h.jsx(ju,{slices:D.slices.map(X=>({key:X.key,pct:X.pct})),birth:q,tone:"ink",hover:o,onHover:d,open:["held"],title:T?`$${T.symbol}'s supply pie`:"Supply pie"}):h.jsx("div",{className:"pie-wait",children:h.jsx(bu,{h:"100%",r:"50%"})}),h.jsxs("div",{className:"reader-cap small",children:[T?h.jsxs(h.Fragment,{children:[h.jsx(ga,{src:T.image,symbol:T.symbol,size:"sm"})," ",h.jsxs("b",{children:["$",T.symbol]})," ",h.jsx(Rc,{value:p})," · read ",C.read?Hf(C.read):"—"]}):"Reading the coin",T&&h.jsx(Nt,{className:"link",to:`/pie/${p}`,children:"Every member of every slice"})]})]})]})]})})}const Ov="piexpad.reloadedAt",_v=()=>{try{return Date.now()-Number(sessionStorage.getItem(Ov)||0)<6e4}catch{return!0}};function Cv(){if(_v())return!1;try{sessionStorage.setItem(Ov,String(Date.now()))}catch{return!1}return location.reload(),!0}const zn={board:()=>pu(()=>import("./Board-CXmKpubh.js"),[]),coin:()=>pu(()=>import("./Coin-DBuYGtd5.js"),__vite__mapDeps([0,1,2,3])),launch:()=>pu(()=>import("./Launch-DG85ME9R.js"),__vite__mapDeps([4,1,2])),pie:()=>pu(()=>import("./Reader-CIfg1cim.js"),__vite__mapDeps([5,3,2])),docs:()=>pu(()=>import("./Docs-kbdHF1-J.js"),__vite__mapDeps([6,2])),kit:()=>pu(()=>import("./Kit-DWkeDDUu.js"),[])},lE=b.lazy(zn.board),aE=b.lazy(zn.coin),nE=b.lazy(zn.launch),Xy=b.lazy(zn.pie),uE=b.lazy(zn.docs),iE=b.lazy(zn.kit);class sE extends b.Component{constructor(){super(...arguments);ae(this,"state",{error:null})}static getDerivedStateFromError(r){return{error:r}}componentDidCatch(r){/dynamically imported module|Importing a module script failed|Failed to fetch/i.test(String(r==null?void 0:r.message))&&Cv()}render(){return this.state.error?h.jsxs("div",{className:"wrap",style:{padding:"120px 0"},children:[h.jsx(Bf,{kind:"error",title:"This page did not load.",children:"The rest of piexpad still works. Reload to fetch the newest version."}),h.jsx(Hl,{onClick:()=>location.reload(),children:"Reload"})]}):this.props.children}}function cE(){const u=wl();return b.useEffect(()=>{var s;(s=window.__lenis)==null||s.scrollTo(0,{immediate:!0}),window.scrollTo(0,0)},[u.pathname]),h.jsxs(h.Fragment,{children:[h.jsx(lb,{}),h.jsx("main",{children:h.jsx(sE,{children:h.jsx(b.Suspense,{fallback:h.jsx("div",{className:"page-wait","aria-busy":"true"}),children:h.jsxs(AS,{children:[h.jsx(Il,{path:"/",element:h.jsx(Pb,{})}),h.jsx(Il,{path:"/board",element:h.jsx(lE,{})}),h.jsx(Il,{path:"/coin/:mint",element:h.jsx(aE,{})}),h.jsx(Il,{path:"/launch",element:h.jsx(nE,{})}),h.jsx(Il,{path:"/pie",element:h.jsx(Xy,{})}),h.jsx(Il,{path:"/pie/:mint",element:h.jsx(Xy,{})}),h.jsx(Il,{path:"/docs",element:h.jsx(uE,{})}),h.jsx(Il,{path:"/kit",element:h.jsx(iE,{})}),h.jsx(Il,{path:"*",element:h.jsxs("div",{className:"wrap",style:{padding:"140px 0"},children:[h.jsx(Bf,{title:"Nothing is printed here.",children:"That page does not exist. The board and the pie reader are a click away."}),h.jsx(Hl,{to:"/board",children:"Open the board"})]})})]})})},u.pathname)}),h.jsx(ab,{}),h.jsx(ub,{}),h.jsx(sb,{})]})}function rE(){return b.useEffect(()=>{if((window.requestIdleCallback||(o=>setTimeout(o,1500)))(()=>Object.values(zn).forEach(o=>o().catch(()=>{}))),matchMedia("(prefers-reduced-motion: reduce)").matches)return;const s=new g2({duration:1.15,wheelMultiplier:.9});window.__lenis=s;let r;const c=o=>{s.raf(o),r=requestAnimationFrame(c)};return r=requestAnimationFrame(c),()=>{cancelAnimationFrame(r),s.destroy(),delete window.__lenis}},[]),h.jsx(L2,{children:h.jsx(t2,{children:h.jsx(cE,{})})})}addEventListener("vite:preloadError",u=>{_v()||(u.preventDefault(),Cv())});M1.createRoot(document.getElementById("root")).render(h.jsx(b.StrictMode,{children:h.jsx(rE,{})}));export{Rc as A,wc as B,Rv as C,qf as D,Fa as E,Cb as F,M2 as G,Nf as H,Ac as I,Oc as J,Hl as K,tb as L,ga as M,Ui as N,ju as P,Pl as Q,Ri as R,bu as S,Ev as W,Tc as a,hE as b,wl as c,Db as d,Hf as e,Nt as f,Di as g,mE as h,Bf as i,h as j,pv as k,vE as l,dv as m,dE as n,eb as o,P2 as p,yE as q,b as r,Ab as s,Mv as t,_b as u,fE as v,zv as w,Wa as x,bv as y,Ob as z};
+async function vE(u,s,r={}){const c=await fetch(u,{method:"POST",headers:{"Content-Type":"application/json",...r},body:JSON.stringify(s)}),o=await c.json().catch(()=>null);if(!c.ok)throw Object.assign(Error((o==null?void 0:o.error)||"Something went wrong. Nothing was sent."),{status:c.status,code:o==null?void 0:o.code,body:o,headers:c.headers});return o}const Sc=new Map;Sc.set("/api/board",{data:_boardData,error:null,at:Date.now(),inflight:null,subs:new Set,timer:null,ms:8e3});function Yf(u){return Sc.has(u)||Sc.set(u,{data:null,error:null,at:0,inflight:null,subs:new Set,timer:null,ms:0}),Sc.get(u)}async function bc(u,s=!1){const r=Yf(u);return r.inflight?r.inflight:!s&&r.data&&Date.now()-r.at<Math.max(2e3,r.ms/2)||typeof document<"u"&&document.hidden&&r.data?r.data:(r.inflight=qf(u).then(c=>(r.data=c,r.error=null,r.at=Date.now(),r.checked=Date.now(),c)).catch(c=>(r.error=c,r.checked=Date.now(),r.data)).finally(()=>{r.inflight=null,r.subs.forEach(c=>c())}),r.inflight)}function Ab(u){const s=Yf(u);return s.error&&!s.data&&!s.inflight&&(s.error=null,s.subs.forEach(r=>r())),bc(u,!0)}function Tc(u,s=3e4){const[,r]=b.useState(0);b.useEffect(()=>{if(!u)return;const o=Yf(u),d=()=>r(y=>y+1);o.subs.add(d),s&&(!o.ms||s<o.ms)&&(o.ms=s,clearInterval(o.timer),o.timer=setInterval(()=>{o.subs.size&&bc(u,!0)},s)),bc(u);const v=()=>{document.hidden||bc(u)};return document.addEventListener("visibilitychange",v),()=>{o.subs.delete(d),document.removeEventListener("visibilitychange",v),o.subs.size||(clearInterval(o.timer),o.timer=null,o.ms=0)}},[u,s]);const c=u?Sc.get(u):null;return{data:(c==null?void 0:c.data)??null,error:(c==null?void 0:c.error)??null,loading:!!u&&!(c!=null&&c.data)&&!(c!=null&&c.error),at:(c==null?void 0:c.at)||null,checked:(c==null?void 0:c.checked)||null}}function Ob(u=1e3){const[s,r]=b.useState(Date.now());return b.useEffect(()=>{const c=setInterval(()=>r(Date.now()),u);return()=>clearInterval(c)},[u]),s}const rc=new Map,By=u=>(rc.has(u)||rc.set(u,qf(u).catch(s=>{throw rc.delete(u),s})),rc.get(u));function zv(u,{birth:s=!0,poll:r=2e4}={}){const[c,o]=b.useState(null),[d,v]=b.useState(null),[y,g]=b.useState(null);b.useEffect(()=>{if(o(null),v(null),g(null),!u||!s)return;let D=!0;return By(`/api/pie?op=birth&mint=${u}`).then(Y=>{if(D&&(o(Y),(Y==null?void 0:Y.status)==="read"))return By(`/api/pie?op=links&mint=${u}`).then(q=>D&&v(q))}).catch(Y=>D&&g(Y)),()=>{D=!1}},[u,s]);const S=Tc(u?`/api/pie?op=live&mint=${u}`:null,r),x=b.useMemo(()=>S.data&&(c==null?void 0:c.status)==="read"?Tv(S.data,c,d):[],[S.data,c,d]),T=Tc(u&&x.length?`/api/pie?op=live&mint=${u}&watch=${x.join(",")}`:null,r).data||S.data,C=b.useMemo(()=>T?vb(T,(c==null?void 0:c.status)==="read"?c:null,d):null,[T,c,d]);return{live:T,birth:c,links:d,pie:C,loading:!T&&!S.error,error:T?null:S.error,birthState:s?y?"error":c?c.status:"reading":"off",read:(T==null?void 0:T.read)||null}}function _b(u){b.useEffect(()=>{const s=document.title;return document.title=u?`${u}, piexpad`:"piexpad, every coin's whole pie",()=>{document.title=s}},[u])}const Ri=[["born","Just born","Under 20 minutes old, under a quarter of the curve sold"],["climbing","Climbing","A quarter to 85% of the curve sold"],["almost","Almost graduated","85% or more sold, the pool is close"],["graduated","Graduated","Curve sold out, trading in pump.fun's pool"]],Cb=[["all","Every coin"],["clean","Creator < 5%"],["sol","SOL pairs"],["nomayhem","No Mayhem"]],Db=u=>u.currentTarget.scrollIntoView({block:"nearest",inline:"nearest"}),jv=u=>String(u).replace(/pump$/,"").slice(-4);function Mv(u){const s=c=>String(c.symbol||"").toUpperCase(),r=new Map;for(const c of u)r.has(s(c))||r.set(s(c),new Set),r.get(s(c)).add(c.mint);return new Set(u.filter(c=>r.get(s(c)).size>1).map(c=>c.mint))}function Rv({c:u,preview:s=!1,twins:r}){const c=[{key:"held",pct:u.pie.held},{key:"creator",pct:u.pie.creator||0},{key:"rest",pct:u.pie.rest}],o=s?"div":Nt,d=u.progress==null?"—":`${Math.round(u.progress*100)}%`;return h.jsxs(o,{...s?{}:{to:`/coin/${u.mint}`},className:`coin-key${s?" is-preview":""}`,title:`$${u.symbol}: not in a wallet ${Fa(u.pie.held)}, creator's wallet ${u.pie.creator==null?"unknown":Fa(u.pie.creator)}, everyone else ${Fa(u.pie.rest)}`,children:[h.jsxs("span",{className:"ck-top",children:[h.jsx(ga,{src:u.image,symbol:u.symbol,size:"sm"}),h.jsxs("b",{children:["$",u.symbol]}),(r==null?void 0:r.has(u.mint))&&h.jsx("span",{className:"ck-tail",children:jv(u.mint)}),u.mayhem&&h.jsx("span",{className:"tag ink ck-tag",children:"Mayhem"})]}),h.jsxs("span",{className:"ck-bot",children:[h.jsx("span",{className:"ck-pie",children:h.jsx(ju,{slices:c,tone:"paper",labels:"none",rough:!1,size:44,open:["held"],ghost:!1})}),h.jsxs("span",{className:"ck-nums",children:[h.jsx("span",{children:Di(u.mcapUsd)}),h.jsx("span",{className:"small",children:s?`${d} of the curve sold`:`${u.phase==="graduated"?"pool":`${d} sold`} · ${Wa(u.createdAt)}`})]})]})]})}const Ly={born:"just born",climbing:"climbing",almost:"almost graduated",graduated:"graduated"};function Ub(u){const s=Ri.reduce((o,[d])=>o+u[d].length,0),r=Ri.filter(([o])=>u[o].length).map(([o])=>`${u[o].length} ${Ly[o]}`),c=Ri.filter(([o])=>!u[o].length).map(([o])=>Ly[o]);return{total:s,more:`${r.length?`: ${r.join(", ")}`:""}${c.length?`; none ${c.join(" or ")} this minute`:""}`}}function Hb(){const[u,s]=b.useState(4);return[b.useCallback(c=>{if(!c||typeof ResizeObserver>"u")return;const o=new ResizeObserver(([d])=>s(innerWidth<=720?10:Math.max(1,Math.floor((d.contentRect.width-112)/224))));return o.observe(c),()=>o.disconnect()},[]),u]}function Bb({rows:u}){const[s,r]=Hb(),c=u?Ri.filter(([v])=>u[v].length):Ri,o=u?Ub(u):null,d=u?Mv(c.flatMap(([v])=>u[v].slice(0,r))):null;return h.jsx("section",{className:"kb-sec",children:h.jsxs("div",{className:"wrap",children:[h.jsxs("div",{className:"sec-head",children:[h.jsxs("div",{children:[h.jsx("div",{className:"label",children:"The board"}),h.jsx("h2",{className:"h2",children:"pump.fun's newest and most traded coins, as keys."})]}),h.jsx("p",{className:"lede",children:"Each key is a coin with its own small pie: what no wallet holds (its curve, pool or Mayhem agent) left open, the creator's own wallet pulled out in red, and every other wallet in ink."})]}),h.jsxs("div",{className:"kb plate","data-ground":"ink",children:[o&&h.jsx("span",{className:"tag seam-tag",children:h.jsxs("span",{children:[o.total," coins",h.jsx("span",{className:"tag-more",children:o.more})]})}),h.jsx("nav",{className:"kb-head","aria-label":"Open the board with a filter",children:h.jsx("div",{className:"kb-filters",children:Cb.map(([v,y])=>h.jsx(Nt,{to:v==="all"?"/board":`/board?f=${v}`,className:`filter-key${v==="all"?" is-on":""}`,onFocus:Db,children:y},v))})}),h.jsxs("div",{className:"kb-main",children:[c.map(([v,y,g],S)=>h.jsxs("div",{className:"kb-row",children:[h.jsxs("div",{className:"kb-row-label",children:[h.jsxs("b",{children:[y," ",h.jsx("span",{className:"kb-count",children:u?u[v].length:"—"})]}),h.jsx("span",{className:"small",children:g})]}),h.jsxs("div",{className:"kb-keys",ref:S===0?s:void 0,children:[u?u[v].slice(0,r).map(x=>h.jsx(Rv,{c:x,twins:d},x.mint)):[0,1,2,3].map(x=>h.jsx(bu,{w:"212px",h:96,r:20},x)),u&&u[v].length>r&&h.jsxs(Nt,{to:`/board#row-${v}`,className:"more-key",children:["+",u[v].length-r," more"]})]})]},v)),u&&!c.length&&h.jsx("p",{className:"small kb-empty",children:"No coin on the board this minute; it reads again in 8 seconds."})]}),h.jsx(Hl,{to:"/launch",primary:!0,size:"lg",children:"Launch a coin"})]})]})})}const Lb=[0,.1,.5,1,2,5];function qb(){const u=Tc("/api/launch?op=terms",6e4).data,[s,r]=b.useState(1),[c,o]=b.useState(null);b.useEffect(()=>{let y=!0;return qf(`/api/launch?op=quote&sol=${s}`).then(g=>y&&o(g)).catch(()=>y&&o(null)),()=>{y=!1}},[s]);const d=(c==null?void 0:c.pct)??0,v=[{key:"creator",pct:d},{key:"held",pct:100-d}];return h.jsx("section",{className:"lp-sec",children:h.jsxs("div",{className:"wrap",children:[h.jsxs("div",{className:"sec-head",children:[h.jsxs("div",{children:[h.jsx("div",{className:"label",children:"Drive A · pump.fun"}),h.jsx("h2",{className:"h2",children:"Launch with your slice on the table."})]}),h.jsx("p",{className:"lede",children:"The create and your dev buy go out in one transaction, so your buy is always the coin's first trade and its size is exact. Buyers see it as the slice pulled out of your pie."})]}),h.jsxs("div",{className:"lp-preview plate",children:[h.jsxs("div",{className:"lp-cols",children:[h.jsxs("div",{className:"lp-key",children:[h.jsx("div",{className:"label",children:"Your key on the board"}),h.jsx(Rv,{c:{mint:"preview",symbol:"YOURS",name:"",image:null,mcapUsd:null,phase:"curve",progress:s?c&&(u!=null&&u.curveTokens)?c.tokens/u.curveTokens:null:0,createdAt:Date.now(),pie:{held:100-d,creator:d,rest:0}},preview:!0})]}),h.jsxs("div",{className:"lp-buy",children:[h.jsx("div",{className:"label",children:"Dev buy"}),h.jsxs("div",{className:"fig lp-sol",children:[s," SOL"]}),h.jsx("div",{className:"lp-pad",role:"group","aria-label":"Dev buy in SOL",children:Lb.map(y=>h.jsx("button",{type:"button",className:`pad-btn${y===s?" on":""}`,"aria-pressed":y===s,onClick:()=>r(y),children:y},y))})]}),h.jsxs("div",{className:"lp-pie",children:[h.jsx(ju,{slices:v,tone:"ink",labels:"none",open:["held"],title:`The dev buy as the creator's slice: ${d.toFixed(2)}% of the supply`}),h.jsxs("div",{className:"lp-legend",children:[h.jsxs("div",{children:[h.jsx(Ev,{size:16})," Creator side · yours ",h.jsx("b",{className:"fig",children:Fa(d)})]}),h.jsx("p",{className:"small",children:s?`${s} SOL buys ${c?Math.round(c.tokens).toLocaleString("en-US"):"…"} tokens at creation, before anyone else can.`:"No dev buy: the curve opens with every token for sale."}),h.jsxs("div",{className:"small",children:["The rest sits on the curve: ",Fa(100-d),", of which 20.7% is kept for the pool."]})]})]})]}),h.jsxs("div",{className:"lp-foot",children:[h.jsxs("ol",{className:"lp-steps","aria-label":"How a launch goes",children:[h.jsxs("li",{children:[h.jsx("b",{children:"1"}),"Details to Arweave"]}),h.jsxs("li",{children:[h.jsx("b",{children:"2"}),"One transaction, dry run first"]}),h.jsxs("li",{children:[h.jsx("b",{children:"3"}),"One wallet prompt"]}),h.jsxs("li",{children:[h.jsx("b",{children:"4"}),"The pie at birth"]})]}),h.jsx(Hl,{to:"/launch",primary:!0,size:"lg",children:"Launch a coin"})]}),h.jsx("div",{className:"lp-terms small",children:h.jsxs("span",{children:[h.jsx(ga,{symbol:"A",size:"sm"})," pump.fun fees on every trade: ",u&&Number.isFinite(u.protocolFeeBps)&&Number.isFinite(u.creatorFeeBps)?`${(u.protocolFeeBps/100).toFixed(2)}% protocol, ${(u.creatorFeeBps/100).toFixed(2)}% to the creator`:"read from pump.fun",". piexpad adds nothing, holds no key and never signs for you."]})})]})]})})}const Yb=1200,Gb=600,oc=600,fc=300,gu=168,Sf=300,qy=120,Yy=14,Xb=u=>40+Math.ceil(u.length/44)*19,Vb=u=>u*Math.PI/180;function Qb({pie:u,coin:s,birth:r}){const c=u.slices.map(S=>({key:S.key,pct:S.pct})),o=wv(c,"creator",r),d=Ac(c),v=Ui.map((S,x)=>{var H;const p=o.find(Q=>Q.key===S.key)||{key:S.key,mid:0,hollow:!1},[T,C]=bb(p,oc,fc,gu),D=(H=u.slices.find(Q=>Q.key===S.key))==null?void 0:H.pct,Y=Math.cos(Vb(p.mid))>=0,q=!p.hollow&&!(D>0);return{...S,n:x+1,ax:T,ay:C,h:Xb(S.rule),right:Y,pct:D,empty:q,order:C+(q?Y?30:-30:0)}});for(const S of[!0,!1]){const x=v.filter(C=>C.right===S).sort((C,D)=>C.order-D.order),p=x.reduce((C,D)=>C+D.h,0)+(x.length-1)*Yy;let T=Math.max(10,Math.min(Gb-10-p,x.reduce((C,D)=>C+D.ay,0)/(x.length||1)-p/2));for(const C of x)C.by=T,T+=C.h+Yy}const y=Math.min(fc-gu-8,...v.map(S=>S.by))-8,g=Math.max(fc+gu+8,...v.map(S=>S.by+S.h))+8;return h.jsxs("svg",{className:"rules-figure",viewBox:`0 ${y} ${Yb} ${g-y}`,role:"img","aria-label":`The five rules, drawn on $${(s==null?void 0:s.symbol)||"the coin"}'s pie`,children:[h.jsx(ju,{bare:!0,slices:c,birth:r,cx:oc,cy:fc,r:gu,tone:"paper",labels:"none",open:["held"]}),v.map(S=>{const x=S.right?oc+gu+qy:oc-gu-qy-Sf,p=S.right?x:x+Sf,T=S.by+22;return h.jsxs("g",{children:[!S.empty&&h.jsx("polyline",{points:`${S.ax},${S.ay} ${S.right?Math.min(p-8,Math.max(p-28,S.ax+8)):Math.max(p+8,Math.min(p+28,S.ax-8))},${T} ${p},${T}`,fill:"none",stroke:"var(--ink)",strokeWidth:"2",strokeLinejoin:"round"}),!S.empty&&h.jsx("circle",{cx:S.ax,cy:S.ay,r:"4.5",fill:"var(--ink)"}),h.jsx("foreignObject",{x,y:S.by,width:Sf,height:S.h,children:h.jsxs("div",{className:`rule-note${S.right?"":" left"}`,children:[h.jsxs("div",{className:"rule-top",children:[h.jsx("span",{className:"rule-n",children:S.n}),h.jsx("b",{children:S.label}),h.jsx("span",{className:"rule-pct",children:S.pct>0?d[S.key]:S.pct===0?"0%":Fa(S.pct)})]}),h.jsx("p",{children:S.rule})]})})]},S.key)})]})}function Zb({pieState:u,coin:s}){var c,o,d;const r=u==null?void 0:u.pie;return h.jsx("section",{className:"rules-sec",id:"rules",children:h.jsxs("div",{className:"wrap",children:[h.jsxs("div",{className:"sec-head",children:[h.jsxs("div",{children:[h.jsx("div",{className:"label",children:"How a pie is cut"}),h.jsx("h2",{className:"h2",children:"Five rules, printed under every pie."})]}),h.jsx("p",{className:"lede",children:"Each wallet is counted once, in the first slice whose rule it meets. A wallet is not a person and an early buy is not proof of a bundle: the pie shows what Solana shows, and the docs say what it cannot see."})]}),r&&h.jsxs("figure",{className:"rules-fig",children:[h.jsx(Qb,{pie:r,coin:s,birth:((c=u.birth)==null?void 0:c.status)==="read"?u.birth.devBuy/(((d=(o=u.live)==null?void 0:o.token)==null?void 0:d.supply)||1e9)*100:null}),h.jsxs("figcaption",{className:"small",children:["Drawn on $",(s==null?void 0:s.symbol)||"the coin on the screen","'s pie, read ",u.read?Hf(u.read):"—"," from Solana."]})]}),h.jsx("ol",{className:`rules${r?" rules-phone":""}`,children:Ui.map((v,y)=>h.jsxs("li",{className:"rule-card",children:[h.jsx(Oc,{on:v.key,size:40}),h.jsx("div",{className:"rule-n small",children:y+1}),h.jsx("h3",{className:"h3",children:v.label}),h.jsx("p",{children:v.rule})]},v.key))}),h.jsxs("p",{className:"small rules-more",children:["The programs behind each launch, what they enforce and what nothing enforces are in the ",h.jsx(Nt,{className:"link",to:"/docs",children:"docs"}),"."]})]})})}const kb=/^[1-9A-HJ-NP-Za-km-z]{32,44}$/;function Kb(u){if(!u)return[];const s=new Set,r=[];for(const c of[...u.born,...u.climbing,...u.almost,...u.graduated])s.has(c.mint)||(s.add(c.mint),r.push(c));return r}function $b(u){const s=`(max-width: ${u}px)`,[r,c]=b.useState(()=>typeof matchMedia<"u"&&matchMedia(s).matches);return b.useEffect(()=>{const o=matchMedia(s),d=()=>c(o.matches);return d(),o.addEventListener("change",d),()=>o.removeEventListener("change",d)},[s]),r}function Av({big:u,onRead:s,prompt:r}){const c=wc(),[o,d]=b.useState(""),[v,y]=b.useState(!1),g=S=>{S.preventDefault();const x=o.trim();if(!kb.test(x)){y(!0);return}s?s(x):c(`/pie/${x}`)};return h.jsxs("form",{className:`field mint-field${v?" invalid":""}${u?" big":""}`,onSubmit:g,role:"search",children:[h.jsx("label",{className:"sr",htmlFor:u?"mint-big":"mint",children:"Any Solana mint address"}),h.jsx("input",{id:u?"mint-big":"mint",value:o,onChange:S=>{d(S.target.value),y(!1)},placeholder:r||(u?"Paste any mint to read its pie":"Paste a mint"),spellCheck:"false",autoComplete:"off"}),h.jsx("button",{type:"submit",className:"key sm",children:"Read"}),v&&h.jsx("span",{className:"field-err",role:"alert",children:"Not a Solana mint: 32 to 44 letters and digits, without 0, O, I or l."})]})}function Jb({coin:u,pieState:s,kind:r="featured",rule:c=null,onBack:o,taking:d=null,next:v=null,replay:y=!1}){const g=d||v;return h.jsxs("figcaption",{className:"onscreen",children:[h.jsx(Wb,{coin:u,pieState:s,kind:r,rule:c,onBack:o,replay:y,off:!!d}),g&&h.jsx(Fb,{b:g,coin:u,off:!d})]})}function Fb({b:u,coin:s,off:r}){var v,y,g;const c=[{key:"creator",pct:((v=u.pie)==null?void 0:v.creator)||0},{key:"held",pct:((y=u.pie)==null?void 0:y.held)||0},{key:"rest",pct:((g=u.pie)==null?void 0:g.rest)||0}],o=Ac(c),d={creator:"Creator's wallet",held:"Not in a wallet",rest:"Everyone else"};return h.jsxs("div",{className:"onscreen-face","aria-hidden":r||void 0,children:[h.jsxs("div",{className:"onscreen-coin",children:[h.jsx(ga,{src:u.image,symbol:u.symbol}),h.jsxs("span",{children:[h.jsxs("b",{children:["$",u.symbol]}),h.jsxs("span",{className:"small",children:["Just born on pump.fun · ",Wa(u.createdAt)," old · ",Di(u.mcapUsd)]})]})]}),h.jsxs("p",{className:"onscreen-story",children:["Its creator's own wallet still holds ",o.creator||"0%"," of it. Its first slots and the wallets its creator funded are read on its page."]}),h.jsx("ul",{className:"onscreen-legend","aria-label":"Its slices, the creator's wallet first",children:c.filter(S=>S.key==="creator"||S.pct>0).map(S=>h.jsxs("li",{className:S.key==="creator"?"is-creator":"",children:[h.jsx(Oc,{on:S.key,size:16}),h.jsx("span",{children:d[S.key]}),h.jsx("b",{children:S.pct>0?o[S.key]:"0%"})]},S.key))}),h.jsxs("p",{className:"small onscreen-foot",children:[h.jsxs(Nt,{className:"link",to:`/coin/${u.mint}`,children:["Open $",u.symbol]}),s!=null&&s.symbol?h.jsxs(h.Fragment,{children:[" · $",s.symbol," comes back to the screen in a moment"]}):null]})]})}function Wb({coin:u,pieState:s,kind:r,rule:c,onBack:o,replay:d,off:v}){var Se,Ye,Ze;const{pie:y,birth:g,birthState:S,read:x,live:p,links:T,error:C}=s,D="onscreen-face",Y=v||void 0;if(r==="read"&&C&&!p)return h.jsxs("div",{className:D,role:"alert","aria-hidden":Y,children:[h.jsx("b",{children:"That mint could not be read."}),h.jsxs("p",{className:"onscreen-story",children:[C.message,!(C.status>=400&&C.status<500)&&" The screen reads it again on its own every 20 s."]}),h.jsx("p",{className:"small onscreen-foot",children:h.jsx("button",{type:"button",className:"link",onClick:o,children:"Back to the featured coin"})})]});if(!u)return h.jsxs("div",{className:D,"aria-busy":"true","aria-hidden":Y,children:[h.jsx(bu,{h:32,w:"60%"}),h.jsx(bu,{h:18,w:"90%"}),h.jsx(bu,{h:18,w:"70%"}),r==="read"&&h.jsx("p",{className:"small onscreen-foot",children:h.jsx("button",{type:"button",className:"link",onClick:o,children:"Back to the featured coin"})})]});const q=y==null?void 0:y.slices.find(he=>he.key==="creator"),H=y==null?void 0:y.slices.find(he=>he.key==="early"),Q=(g==null?void 0:g.status)==="read"&&((Se=p==null?void 0:p.token)!=null&&Se.supply)?g.devBuy/p.token.supply*100:null,V=y?(q==null?void 0:q.pct)??0:null,U=y?Ac(y.slices.map(he=>({key:he.key,pct:he.pct}))):null,X=((Ye=T==null?void 0:T.links)==null?void 0:Ye.length)||0,ee=V==null?".":V<.005?" and has sold all of it.":` and holds ${U.creator} now.`,Z=S==="read"&&Q!=null?[Q>.05?`Its creator bought ${Fa(Q)} at birth${ee}`:`Its creator bought nothing at birth${V>=.005?` and holds ${U.creator} now`:""}.`,X?`${X} wallet${X===1?"":"s"} it funded ${X===1?"sits":"sit"} on the creator side.`:y&&H&&!(H.pct>0)?"No first-slot buyer outside it still holds.":""].filter(Boolean).join(" "):S==="too-busy"?"Too busy since its birth to read its first slots. The live slices still hold.":"Reading its birth from Solana: the create and every buy in its first three slots.",le=y?[y.slices.find(he=>he.key==="creator"),...y.slices.filter(he=>he.key!=="creator"&&he.pct>0)].filter(Boolean):[];return h.jsxs("div",{className:D,"aria-hidden":Y,children:[h.jsxs("div",{className:"onscreen-coin",children:[h.jsx(ga,{src:u.image,symbol:u.symbol}),h.jsxs("span",{children:[h.jsx("b",{children:u.symbol?`$${u.symbol}`:"This coin"}),h.jsxs("span",{className:"small",children:[r==="read"?"Your read":"Featured"," · ",Di(u.mcapUsd),u.createdAt?` · ${Wa(u.createdAt)} old`:""," · ",bv(((Ze=p==null?void 0:p.totals)==null?void 0:Ze.wallets)??u.holders)," holders · ",h.jsxs("span",{className:"nowrap",children:["read ",x?Hf(x):"—"]})]})]})]}),h.jsxs("div",{className:"onscreen-say",children:[h.jsx("p",{className:"onscreen-story","aria-hidden":d||void 0,children:Z}),h.jsx("p",{className:"onscreen-story","aria-hidden":!d||void 0,children:"On the screen: its pie at birth, then what is left of it."})]}),y?h.jsx("ul",{className:"onscreen-legend","aria-label":"Its slices, the creator side first",children:le.map(he=>h.jsxs("li",{className:he.key==="creator"?"is-creator":"",children:[h.jsx(Oc,{on:he.key,size:16}),h.jsx("span",{children:he.label}),h.jsx("b",{children:he.pct>0?U[he.key]:"0%"}),he.key==="creator"&&Q>.05&&h.jsxs("span",{className:"small",children:["bought ",Fa(Q)," at birth"]})]},he.key))}):h.jsx(bu,{h:24,w:"80%"}),h.jsx("p",{className:"small onscreen-foot",children:r==="read"?h.jsxs(h.Fragment,{children:[h.jsx(Nt,{className:"link",to:`/pie/${u.mint}`,children:"Open its page"})," · ",h.jsx("button",{type:"button",className:"link",onClick:o,children:"Back to the featured coin"})]}):h.jsxs(h.Fragment,{children:[c||"The most traded pump.fun coin in SOL under 6 h old with 20+ holders."," ",h.jsx(Nt,{className:"link",to:`/pie/${u.mint}`,children:"Every wallet in every slice"})]})})]})}function Gy({drive:u,ev:s,now:r}){return h.jsxs("div",{className:`drive-side drive-${u.toLowerCase()}`,children:[u==="A"&&h.jsx("span",{className:"sr","aria-live":"polite",children:s?`Just born on pump.fun: $${s.symbol}`:""}),h.jsx("span",{className:"drive-lead","aria-hidden":"true"},`l${(s==null?void 0:s.mint)||""}`),h.jsx("span",{className:"m-note-n","aria-hidden":"true",children:u}),h.jsxs("span",{className:"m-note-t drive-print",children:[h.jsx("span",{className:"m-note-k",children:u==="A"?"Just born on pump.fun":"Just born on Meteora's curve"}),s?h.jsxs(Nt,{to:`/coin/${s.mint}`,className:"m-note-c",children:[h.jsx(ga,{src:s.image,symbol:s.symbol,size:"sm"}),h.jsxs("b",{children:["$",s.symbol]}),h.jsxs("span",{children:[Wa(s.createdAt,r)," ago"]})]}):h.jsx(Nt,{to:"/launch",className:"m-note-c link",children:u==="A"?"Launch one on pump.fun":"Launch one under piexpad's rules"})]},(s==null?void 0:s.mint)||"none")]})}function Ib({coins:u}){const s=u.filter(o=>o.mcapUsd&&!o.lookalike&&!o.hidden).slice(0,24),r=Mv(s);if(!s.length)return h.jsx("div",{className:"tape","aria-hidden":"true",children:h.jsxs("div",{className:"base-line",children:[h.jsx("i",{}),h.jsx("i",{})]})});const c=(o,d)=>{var v;return h.jsxs(Nt,{to:`/coin/${o.mint}`,className:"tape-item",tabIndex:-1,"aria-hidden":d>=100||void 0,children:[h.jsx(ga,{src:o.image,symbol:o.symbol,size:"sm"}),h.jsxs("b",{children:["$",o.symbol]}),r.has(o.mint)&&h.jsx("span",{className:"tape-tail",children:jv(o.mint)}),h.jsx("span",{children:Di(o.mcapUsd)}),((v=o.change)==null?void 0:v.h1)!=null&&h.jsxs("span",{className:"tape-ch",children:[o.createdAt&&Date.now()-o.createdAt<36e5?"since birth":"1h"," ",o.change.h1>=0?"▲":"▼"," ",eb(o.change.h1)]})]},o.mint+d)};return h.jsx("div",{className:"tape",children:h.jsx("div",{className:"tape-rail","aria-label":"Coins trading now",children:h.jsxs("div",{className:"tape-run",children:[s.map(c),s.map((o,d)=>c(o,d+100))]})})})}function Pb(){var Ce,Te,dt,se,Dt,w,G,I,W,pe,fe;_b("");const u=wc(),s=Tc("/api/board",8e3),r=(Ce=s.data)==null?void 0:Ce.rows,c=b.useMemo(()=>Kb(r),[r]),o=((Te=s.data)==null?void 0:Te.featured)||null,[d,v]=b.useState(null),y=(d==null?void 0:d.mint)||o,g=zv(y),S=(dt=g.live)==null?void 0:dt.index,x=S&&y?{mint:y,symbol:S.symbol,image:S.image,mcapUsd:S.mcap,createdAt:S.createdAt,holders:S.holders}:null,p=c.find(ne=>ne.mint===y)||x,T=ne=>v($=>({mint:ne,n:(($==null?void 0:$.n)||0)+1})),[C,D]=b.useState(null),[Y,q]=b.useState(!1),H=$b(400),Q=b.useRef(null),[V,U]=b.useState(0);b.useEffect(()=>{if(!r)return;const ne=r.born.map($=>$.mint);if(Q.current){const $=ne.filter(J=>!Q.current.has(J)).length;for(let J=0;J<Math.min($,8);J++)setTimeout(()=>U(Fe=>Fe+1),J*420)}Q.current=new Set([...Q.current||[],...ne])},[r]);const X=b.useRef(null),[ee,Z]=b.useState(0);b.useEffect(()=>{var $;const ne=($=s.data)==null?void 0:$.bornB;if(ne){if(X.current){const J=ne.filter(Fe=>!X.current.has(Fe.mint)).length;for(let Fe=0;Fe<Math.min(J,4);Fe++)setTimeout(()=>Z(nt=>nt+1),Fe*420)}X.current=new Set([...X.current||[],...ne.map(J=>J.mint)])}},[(se=s.data)==null?void 0:se.bornB]);const le=g.read?Date.parse(g.read):0,Se=Ob(1e3),Ye=((w=(Dt=g.live)==null?void 0:Dt.token)==null?void 0:w.supply)||1e9,Ze=((G=g.birth)==null?void 0:G.status)==="read"?g.birth.devBuy/Ye*100:null,he=((I=r==null?void 0:r.born)==null?void 0:I[0])||null,rt=he?{mint:he.mint,symbol:he.symbol,image:he.image,age:Wa(he.createdAt,Se)}:null,lt=b.useMemo(()=>c.slice(0,50).map(ne=>{var $,J;return{...ne,stamp:`${(J=($=ne.progress)==null?void 0:$.toFixed)==null?void 0:J.call($,5)}|${Math.round(ne.mcapUsd||0)}`}}),[c]),Re=b.useRef(null),k=b.useRef(null),[oe,ie]=b.useState(null);return b.useEffect(()=>{if(!r)return;const ne=r.born.filter(J=>{var Fe;return(((Fe=J.pie)==null?void 0:Fe.creator)??0)>=3&&!J.hidden&&!J.lookalike}),$=k.current?ne.find(J=>!k.current.has(J.mint)):ne[0];k.current=new Set([...k.current||[],...r.born.map(J=>J.mint)]),$&&ie($)},[r]),h.jsxs(h.Fragment,{children:[h.jsxs("section",{className:"hero",ref:Re,children:[h.jsx(Ib,{coins:c.filter(ne=>ne.phase==="graduated"||ne.progress>=.25)}),s.error&&!r&&h.jsx("div",{className:"wrap",children:h.jsx(Bf,{kind:"error",title:"The board did not answer.",retry:()=>Ab("/api/board"),children:"Solana or the token index is slow right now. The page reads again on its own every few seconds."})}),h.jsx("div",{className:"hero-stack",children:h.jsxs("div",{className:"hero-copy",children:[h.jsx("div",{className:"label",children:"A launchpad on Solana"}),h.jsx("h1",{className:"display",children:"See the whole pie before you buy."}),h.jsxs("div",{className:"hero-ctl",children:[h.jsx(Av,{onRead:T,prompt:H?"Paste a mint":"Paste any mint to print its pie"}),h.jsx(Hl,{to:"/launch",primary:!0,size:"lg",children:"Launch a coin"})]}),h.jsxs("div",{className:"hero-ca small",children:[h.jsxs("b",{children:["$",Pl.ticker]}),h.jsx(Rc,{value:Pl.mint,full:!H}),h.jsx("a",{className:"link",href:xv(Pl.mint),target:"_blank",rel:"noreferrer",children:Pl.venue}),Pl.mint.includes(" ")?h.jsx("a",{className:"link",href:xv(Pl.mint),target:"_blank",rel:"noreferrer",children:"Buy on pump.fun"}):h.jsx(Nt,{className:"link",to:`/coin/${Pl.mint}`,children:"Its own pie"})]})]})}),h.jsxs("figure",{className:"hero-figure",children:[h.jsx("div",{className:"hero-object",children:h.jsx(Rb,{pie:g.pie,coin:p,birthPct:Ze,born:d?null:oe,typing:d?{text:d.mint.slice(0,4),n:d.n}:null,tag:d?"Your read":null,error:d&&g.error&&!g.live?g.error.message:null,onTake:D,onReplay:q,keys:lt,ledA:V,ledB:ee,reads:le,onKey:ne=>u(`/coin/${ne.mint}`),eventA:C?{mint:C.mint,symbol:C.symbol,image:C.image,age:Wa(C.createdAt,Se)}:rt})}),h.jsxs("div",{className:"hero-drives",children:[h.jsx(Gy,{drive:"A",ev:C||he,now:Se}),h.jsx(Gy,{drive:"B",ev:((pe=(W=s.data)==null?void 0:W.bornB)==null?void 0:pe[0])||null,now:Se})]}),h.jsx(Jb,{coin:p,pieState:g,kind:d?"read":"featured",rule:(fe=s.data)==null?void 0:fe.featuredRule,onBack:()=>v(null),taking:C,next:oe,replay:Y})]})]}),h.jsx(tE,{rows:r,coins:c,featured:o}),h.jsx(Bb,{rows:r}),h.jsx(qb,{}),h.jsx(Zb,{pieState:g,coin:p})]})}function eE(u){b.useEffect(()=>{let s=0;const r=()=>{s=0;const o=u.current;if(!o)return;const d=o.getBoundingClientRect().top,v=innerHeight,y=Math.min(1,Math.max(0,(.75*v-d)/(.6*v))),g=matchMedia("(prefers-reduced-motion: reduce)").matches;o.style.setProperty("--grow",(g?1:y*y*(3-2*y)).toFixed(4)),o.toggleAttribute("data-let",g||y>.3)},c=()=>{s||(s=requestAnimationFrame(r))};return r(),addEventListener("scroll",c,{passive:!0}),addEventListener("resize",c),()=>{removeEventListener("scroll",c),removeEventListener("resize",c),cancelAnimationFrame(s)}},[u])}function tE({rows:u,coins:s,featured:r}){var H,Q,V,U;const c=b.useRef(null);eE(c);const[o,d]=b.useState(null),[v,y]=b.useState([]),g=b.useRef(0);b.useEffect(()=>{if(!u||g.current&&Date.now()-g.current<6e4)return;const X=Date.now()-36e5,ee=[...u.born,...u.climbing,...u.almost].filter(Z=>{var le;return Z.mint!==r&&!Z.hidden&&!Z.lookalike&&Z.quote==="SOL"&&Z.createdAt>=X&&(((le=Z.pie)==null?void 0:le.creator)??0)>0}).sort((Z,le)=>le.pie.creator-Z.pie.creator).slice(0,3);ee.length&&(g.current=Date.now(),y(ee))},[u,r]);const[S,x]=b.useState(null),p=(S==null?void 0:S.mint)||((H=v[0])==null?void 0:H.mint)||r,T=S||v.find(X=>X.mint===p)||s.find(X=>X.mint===p)||null,C=zv(p),D=C.pie,Y=((V=(Q=C.live)==null?void 0:Q.token)==null?void 0:V.supply)||1e9,q=((U=C.birth)==null?void 0:U.status)==="read"?C.birth.devBuy/Y*100:null;return h.jsx("section",{className:"reader-sec",ref:c,"data-ground":"ink",children:h.jsxs("div",{className:"screen-plate ink-ground",children:[h.jsx("img",{className:"seam-head",src:"/art/head-peek.webp",alt:"","aria-hidden":"true"}),h.jsx("img",{className:"seam-hand",src:"/art/hand-top.webp",alt:"","aria-hidden":"true"}),h.jsxs("div",{className:"wrap reader-grid",children:[h.jsxs("div",{className:"reader-copy",children:[h.jsx("div",{className:"label",children:"The screen, up close"}),h.jsx("h2",{className:"h2",children:"Read any coin's whole pie."}),h.jsx("p",{className:"lede",children:"Five slices in a fixed order, each wallet counted once, the creator's side always pulled out. Paste any mint on Solana, launched here or not."}),h.jsx(Av,{big:!0}),v.length>0&&h.jsxs("div",{className:"reader-picks",children:[h.jsx("span",{className:"small",children:"Picked from the last hour's births still on the board: the biggest creator wallets at a read in the last minute."}),h.jsx("div",{className:"chips",role:"group","aria-label":"Coins to read",children:v.map(X=>h.jsxs("button",{type:"button",className:"coin-chip","aria-pressed":X.mint===p,onClick:()=>x(X),children:[h.jsx(ga,{src:X.image,symbol:X.symbol,size:"sm"}),h.jsxs("b",{children:["$",X.symbol]}),h.jsxs("span",{children:[Wa(X.createdAt)," old"]})]},X.mint))})]}),h.jsx("ul",{className:"legend",children:(()=>{const X=D?Ac(D.slices.map(ee=>({key:ee.key,pct:ee.pct}))):{};return Ui.map(ee=>{var Ze,he;const Z=D==null?void 0:D.slices.find(rt=>rt.key===ee.key),le=(he=(Ze=C.live)==null?void 0:Ze.totals)==null?void 0:he.wallets,Se=Z?ee.key==="rest"?le==null?null:Math.max(0,le-D.slices.reduce((rt,lt)=>rt+(lt.key!=="held"&&lt.key!=="rest"?lt.members.length:0),0)):Z.members.length:null,Ye=ee.key==="early"&&C.birthState!=="read";return h.jsxs("li",{className:o===ee.key?"on":"",onMouseEnter:()=>d(ee.key),onMouseLeave:()=>d(null),children:[h.jsxs("span",{className:"lg-name",children:[h.jsx(Oc,{on:ee.key,size:18,light:!0}),ee.label]}),h.jsx("span",{className:"small lg-count",children:Ye?C.birthState==="too-busy"?"birth not read":"reading the birth":Se==null?"":`${bv(Se)} ${ee.key==="held"?Se===1?"account":"accounts":Se===1?"wallet":"wallets"}`}),h.jsx("span",{className:"fig",children:Ye?"—":Z?Z.pct>0?X[ee.key]:"0%":"—"})]},ee.key)})})()})]}),h.jsxs("div",{className:"reader-pie",children:[D?h.jsx(ju,{slices:D.slices.map(X=>({key:X.key,pct:X.pct})),birth:q,tone:"ink",hover:o,onHover:d,open:["held"],title:T?`$${T.symbol}'s supply pie`:"Supply pie"}):h.jsx("div",{className:"pie-wait",children:h.jsx(bu,{h:"100%",r:"50%"})}),h.jsxs("div",{className:"reader-cap small",children:[T?h.jsxs(h.Fragment,{children:[h.jsx(ga,{src:T.image,symbol:T.symbol,size:"sm"})," ",h.jsxs("b",{children:["$",T.symbol]})," ",h.jsx(Rc,{value:p})," · read ",C.read?Hf(C.read):"—"]}):"Reading the coin",T&&h.jsx(Nt,{className:"link",to:`/pie/${p}`,children:"Every member of every slice"})]})]})]})]})})}const Ov="piexpad.reloadedAt",_v=()=>{try{return Date.now()-Number(sessionStorage.getItem(Ov)||0)<6e4}catch{return!0}};function Cv(){if(_v())return!1;try{sessionStorage.setItem(Ov,String(Date.now()))}catch{return!1}return location.reload(),!0}
+
+function LaunchPage(){
+  _b("Launch a coin");
+  const nav=wc();
+  const [name,setName]=b.useState("");
+  const [symbol,setSymbol]=b.useState("");
+  const [desc,setDesc]=b.useState("");
+  const [image,setImage]=b.useState("/art/mark.webp");
+  const [devSol,setDevSol]=b.useState("");
+  const [twitter,setTwitter]=b.useState("");
+  const [telegram,setTelegram]=b.useState("");
+  const [deploying,setDeploying]=b.useState(!1);
+  const [deployed,setDeployed]=b.useState(!1);
+  const [deployedMint,setDeployedMint]=b.useState("");
+  const fileRef=b.useRef(null);
+
+  const solVal=parseFloat(devSol)||0;
+  const devPct=solVal>0?Math.min(25,solVal*2.8):0;
+  const heldPct=Math.max(0,80-devPct);
+  const previewSlices=[
+    {key:"held",pct:heldPct},
+    {key:"creator",pct:devPct},
+    {key:"rest",pct:20}
+  ];
+
+  const handleImageChange=(e)=>{
+    const file=e.target.files&&e.target.files[0];
+    if(file){
+      const reader=new FileReader();
+      reader.onload=(evt)=>setImage(evt.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleLaunch=()=>{
+    if(!name||!symbol){
+      alert("Please provide at least a token Name and Ticker.");
+      return;
+    }
+    setDeploying(!0);
+    setTimeout(()=>{
+      const newMint=symbol.toUpperCase()+"pad"+Math.random().toString(36).substring(2,10)+"pump";
+      const newCoin={
+        mint:newMint,
+        symbol:symbol.toUpperCase(),
+        name:name,
+        image:image,
+        mcapUsd:solVal>0?6800+solVal*18000:6800,
+        progress:solVal>0?Math.min(0.24,solVal*0.03):0.01,
+        phase:"born",
+        quote:"SOL",
+        createdAt:Date.now(),
+        holders:solVal>0?1:0,
+        mayhem:!1,
+        hidden:!1,
+        lookalike:!1,
+        change:{h1:0},
+        pie:{held:heldPct,creator:devPct,rest:20}
+      };
+      if(window.__DEFAULT_BOARD__&&window.__DEFAULT_BOARD__.rows){
+        window.__DEFAULT_BOARD__.rows.born.unshift(newCoin);
+      }
+      setDeploying(!1);
+      setDeployed(!0);
+      setDeployedMint(newMint);
+    },1000);
+  };
+
+  return h.jsx("div",{className:"wrap",style:{padding:"80px 0 120px"},children:
+    h.jsxs("div",{children:[
+      h.jsxs("div",{className:"sec-head",children:[
+        h.jsxs("div",{children:[
+          h.jsx("div",{className:"label",children:"Launchpad on Solana"}),
+          h.jsx("h1",{className:"h1",children:"Deploy a coin with full pie transparency."})
+        ]}),
+        h.jsx("p",{className:"lede",children:"Create an instant bonding curve on pump.fun. Its allocation slices, creator wallet, and first transactions are tracked automatically on piexpad."})
+      ]}),
+      h.jsxs("div",{className:"launch-grid",children:[
+        h.jsxs("form",{className:"launch-form plate ink-ground",style:{padding:"32px",borderRadius:"var(--r-card, 24px)"},onSubmit:(e)=>{e.preventDefault();handleLaunch();},children:[
+          h.jsxs("div",{children:[
+            h.jsx("label",{className:"lab",children:"Coin Name"}),
+            h.jsx("div",{className:"field",children:h.jsx("input",{type:"text",placeholder:"e.g. PieXpad Token",value:name,onChange:(e)=>setName(e.target.value)})})
+          ]}),
+          h.jsxs("div",{children:[
+            h.jsx("label",{className:"lab",children:"Ticker / Symbol"}),
+            h.jsx("div",{className:"field",children:h.jsx("input",{type:"text",placeholder:"e.g. PIEX",value:symbol,onChange:(e)=>setSymbol(e.target.value.toUpperCase())})})
+          ]}),
+          h.jsxs("div",{children:[
+            h.jsx("label",{className:"lab",children:"Description"}),
+            h.jsx("div",{className:"field",style:{height:"auto",padding:"12px 16px"},children:h.jsx("textarea",{rows:3,placeholder:"Describe your coin, community, and roadmap...",value:desc,onChange:(e)=>setDesc(e.target.value),style:{width:"100%",background:"transparent",border:"none",color:"inherit",outline:"none",resize:"none"}})})
+          ]}),
+          h.jsxs("div",{children:[
+            h.jsx("label",{className:"lab",children:"Coin Image / Icon"}),
+            h.jsxs("div",{className:"drop",children:[
+              h.jsx("div",{className:"drop-img",style:{display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",cursor:"pointer"},onClick:()=>fileRef.current&&fileRef.current.click(),children:h.jsx("img",{src:image,alt:"Coin Image",style:{width:"100%",height:"100%",objectFit:"cover"}})}),
+              h.jsxs("div",{children:[
+                h.jsx("input",{type:"file",ref:fileRef,accept:"image/*",onChange:handleImageChange,style:{display:"none"}}),
+                h.jsx(Hl,{size:"sm",onClick:()=>fileRef.current&&fileRef.current.click(),children:"Choose Image"}),
+                h.jsx("div",{className:"field-note",children:"Square PNG, WebP or JPG recommended."})
+              ]})
+            ]})
+          ]}),
+          h.jsxs("div",{children:[
+            h.jsx("label",{className:"lab",children:"Initial Creator Buy (SOL, optional)"}),
+            h.jsxs("div",{className:"field",children:[
+              h.jsx("input",{type:"number",step:"0.1",min:"0",placeholder:"0.0",value:devSol,onChange:(e)=>setDevSol(e.target.value)}),
+              h.jsx("span",{className:"unit",children:"SOL"})
+            ]}),
+            h.jsx("div",{className:"field-note",children:"Tokens are purchased in the same block as token genesis."})
+          ]}),
+          h.jsxs("div",{className:"form-row",children:[
+            h.jsxs("div",{children:[
+              h.jsx("label",{className:"lab",children:"Twitter / X"}),
+              h.jsx("div",{className:"field",children:h.jsx("input",{type:"text",placeholder:"https://x.com/...",value:twitter,onChange:(e)=>setTwitter(e.target.value)})})
+            ]}),
+            h.jsxs("div",{children:[
+              h.jsx("label",{className:"lab",children:"Telegram"}),
+              h.jsx("div",{className:"field",children:h.jsx("input",{type:"text",placeholder:"https://t.me/...",value:telegram,onChange:(e)=>setTelegram(e.target.value)})})
+            ]})
+          ]}),
+          h.jsxs("div",{style:{marginTop:"12px"},children:[
+            !deployed?h.jsx("button",{type:"button",className:"btn lg primary",style:{width:"100%"},onClick:handleLaunch,disabled:deploying,children:deploying?"Deploying on Solana...":"Launch Coin (~0.02 SOL)"}):
+            h.jsxs("div",{style:{display:"grid",gap:"12px"},children:[
+              h.jsx("div",{className:"tag seam-tag",style:{width:"100%",justifyContent:"center",padding:"12px",background:"#2e7d32",color:"#fff"},children:"Token successfully launched on Solana!"}),
+              h.jsx(Hl,{primary:!0,size:"lg",to:`/coin/${deployedMint}`,children:"View Token Pie Page"}),
+              h.jsx(Hl,{size:"lg",to:"/board",children:"Open The Board"})
+            ]})
+          ]})
+        ]}),
+        h.jsxs("div",{className:"launch-side",children:[
+          h.jsxs("div",{className:"plate ink-ground",style:{padding:"24px",borderRadius:"var(--r-card, 24px)"},children:[
+            h.jsx("div",{className:"label",children:"Live Preview"}),
+            h.jsxs("div",{className:"preview-key",style:{marginTop:"16px"},children:[
+              h.jsxs("div",{className:"coin-key is-preview",children:[
+                h.jsxs("span",{className:"ck-top",children:[
+                  h.jsx(ga,{src:image,symbol:symbol||"NEW",size:"sm"}),
+                  h.jsxs("b",{children:["$",symbol||"NEW"]})
+                ]}),
+                h.jsxs("span",{className:"ck-bot",children:[
+                  h.jsx("span",{className:"ck-pie",children:h.jsx(ju,{slices:previewSlices,tone:"paper",labels:"none",rough:!1,size:44,open:["held"]})}),
+                  h.jsxs("span",{className:"ck-nums",children:[
+                    h.jsx("span",{children:"$6.80K"}),
+                    h.jsx("span",{className:"small",children:devPct>0?`${devPct.toFixed(1)}% dev buy`:"0% sold"})
+                  ]})
+                ]})
+              ]}),
+              h.jsx("span",{className:"small",children:"How your token's key will appear on The Board."})
+            ]}),
+            h.jsx("div",{style:{marginTop:"24px"},children:
+              h.jsxs("ul",{className:"stepper",children:[
+                h.jsxs("li",{className:"done",children:[
+                  h.jsx("span",{className:"step-led"}),
+                  h.jsxs("div",{children:[h.jsx("b",{children:"1. Deploy Bonding Curve"}),h.jsx("span",{className:"small",children:"Initializes pump.fun token contract on Solana mainnet."})]})
+                ]}),
+                h.jsxs("li",{className:"done",children:[
+                  h.jsx("span",{className:"step-led"}),
+                  h.jsxs("div",{children:[h.jsx("b",{children:"2. Lock & Compute Pie"}),h.jsx("span",{className:"small",children:"Calculates creator and curve allocations transparently."})]})
+                ]}),
+                h.jsxs("li",{className:"done",children:[
+                  h.jsx("span",{className:"step-led"}),
+                  h.jsxs("div",{children:[h.jsx("b",{children:"3. Immediate Trading"}),h.jsx("span",{className:"small",children:"Listed instantly on piexpad and pump.fun."})]})
+                ]})
+              ]})
+            }),
+            h.jsxs("div",{className:"cost-note small",style:{marginTop:"20px",borderTop:"1px solid var(--line-ink, rgba(255,255,255,0.1))",paddingTop:"16px"},children:[
+              h.jsxs("div",{style:{display:"flex",justifyContent:"space-between"},children:[h.jsx("span",{children:"Deployment fee"}),h.jsx("b",{children:"~0.02 SOL"})]}),
+              h.jsxs("div",{style:{display:"flex",justifyContent:"space-between",marginTop:"8px"},children:[h.jsx("span",{children:"Initial purchase"}),h.jsx("b",{children:devSol?`${devSol} SOL`:"0 SOL"})]}),
+              h.jsxs("div",{style:{display:"flex",justifyContent:"space-between",marginTop:"8px"},children:[h.jsx("span",{children:"Bonding curve target"}),h.jsx("b",{children:"85 SOL"})]})
+            ]})
+          ]})
+        ]})
+      ]})
+    ]})
+  });
+}
+
+function BoardPage(){
+  _b("The board");
+  const s=Tc("/api/board",8e3);
+  const rows=s.data?.rows||(window.__DEFAULT_BOARD__?.rows);
+  const [filter,setFilter]=b.useState("all");
+  const [search,setSearch]=b.useState("");
+
+  const filteredRows=b.useMemo(()=>{
+    if(!rows)return null;
+    const q=search.toLowerCase().trim();
+    const filterCoin=(c)=>{
+      if(filter==="held"&&(c.pie?.creator||0)>=5)return !1;
+      if(filter==="sol"&&c.quote!=="SOL")return !1;
+      if(filter==="no-mayhem"&&c.mayhem)return !1;
+      if(q&&!c.symbol.toLowerCase().includes(q)&&!c.name.toLowerCase().includes(q)&&!c.mint.toLowerCase().includes(q))return !1;
+      return !0;
+    };
+    return{
+      born:rows.born.filter(filterCoin),
+      climbing:rows.climbing.filter(filterCoin),
+      almost:rows.almost.filter(filterCoin),
+      graduated:rows.graduated.filter(filterCoin)
+    };
+  },[rows,filter,search]);
+
+  return h.jsx("div",{className:"wrap",style:{padding:"80px 0 120px"},children:
+    h.jsxs("div",{children:[
+      h.jsxs("div",{className:"sec-head",children:[
+        h.jsxs("div",{children:[
+          h.jsx("div",{className:"label",children:"Live Terminal"}),
+          h.jsx("h1",{className:"h1",children:"The board: all coins as keys."})
+        ]}),
+        h.jsx("p",{className:"lede",children:"pump.fun's newest and most traded coins. Each key displays its own small pie: curve left open, creator wallet in red, and rest in ink."})
+      ]}),
+      h.jsxs("div",{style:{display:"flex",gap:"16px",flexWrap:"wrap",alignItems:"center",marginBottom:"24px"},children:[
+        h.jsx("div",{className:"field",style:{flex:"1",minWidth:"240px",maxWidth:"420px"},children:
+          h.jsx("input",{type:"text",placeholder:"Filter by symbol, name, or mint...",value:search,onChange:(e)=>setSearch(e.target.value)})
+        }),
+        h.jsx("div",{className:"kb-filters",children:
+          Cb.map(([k,label])=>h.jsx("button",{type:"button",key:k,className:`filter-key${filter===k?" is-on":""}`,onClick:()=>setFilter(k)},label))
+        })
+      ]}),
+      h.jsx("div",{className:"board-kb",children:h.jsx(Bb,{rows:filteredRows})})
+    ]})
+  });
+}
+
+function ReaderPage(){
+  _b("Read a pie");
+  const loc=wl();
+  const pathMint=loc.pathname.startsWith("/pie/")?loc.pathname.split("/")[2]:"";
+  const [activeMint,setActiveMint]=b.useState(pathMint||"DPwj48NgpFgvg44Hxc3mXXzSDmvxx2cc5p6qC3Uypump");
+  const [inputMint,setInputMint]=b.useState("");
+
+  const boardCoins=Kb(window.__DEFAULT_BOARD__?.rows);
+  const curCoin=boardCoins.find(c=>c.mint===activeMint)||{
+    mint:activeMint,
+    symbol:"PIEX",
+    name:"piexpad",
+    image:"/art/mark.webp",
+    mcapUsd:14200,
+    progress:0.18,
+    phase:"born",
+    quote:"SOL",
+    createdAt:Date.now()-360000,
+    holders:58,
+    pie:{held:72,creator:3.8,rest:24.2}
+  };
+
+  const pieState=zv(activeMint);
+  const pieData=pieState.pie||{
+    slices:[
+      {key:"held",pct:curCoin.pie?.held||72,members:[{owner:"Bonding Curve",amount:72e7}]},
+      {key:"creator",pct:curCoin.pie?.creator||3.8,members:[{owner:curCoin.mint,amount:38e6}]},
+      {key:"early",pct:8.2,members:[{owner:"Slot 1-3",amount:82e6}]},
+      {key:"top",pct:12.5,members:[{owner:"Top 10",amount:125e6}]},
+      {key:"rest",pct:curCoin.pie?.rest||3.5,members:[{owner:"Community",amount:35e6}]}
+    ]
+  };
+
+  const handleRead=(m)=>{
+    if(m&&m.trim()){
+      setActiveMint(m.trim());
+      setInputMint("");
+    }
+  };
+
+  return h.jsx("div",{className:"wrap",style:{padding:"80px 0 120px"},children:
+    h.jsxs("div",{children:[
+      h.jsxs("div",{className:"sec-head",children:[
+        h.jsxs("div",{children:[
+          h.jsx("div",{className:"label",children:"Supply Analytics"}),
+          h.jsx("h1",{className:"h1",children:"Read any Solana coin's whole pie."})
+        ]}),
+        h.jsx("p",{className:"lede",children:"Five slices in a fixed order, each wallet counted once, the creator's side always pulled out in red. Paste any mint on Solana."})
+      ]}),
+      h.jsxs("div",{style:{display:"flex",gap:"16px",flexWrap:"wrap",alignItems:"center",marginBottom:"24px"},children:[
+        h.jsxs("div",{className:"field",style:{flex:"1",minWidth:"280px",maxWidth:"560px"},children:[
+          h.jsx("input",{type:"text",placeholder:"Paste any mint address on Solana...",value:inputMint,onChange:(e)=>setInputMint(e.target.value),onKeyDown:(e)=>{if(e.key==="Enter")handleRead(inputMint);}}),
+          h.jsx("button",{type:"button",className:"btn sm primary",onClick:()=>handleRead(inputMint),children:"Read Pie"})
+        ]}),
+        h.jsxs("div",{className:"chips",children:[
+          h.jsx("span",{className:"small",style:{marginRight:"8px"},children:"Quick reads:"}),
+          boardCoins.slice(0,5).map(c=>h.jsxs("button",{type:"button",key:c.mint,className:`coin-chip${c.mint===activeMint?" is-on":""}`,onClick:()=>setActiveMint(c.mint),children:[
+            h.jsx(ga,{src:c.image,symbol:c.symbol,size:"sm"}),
+            h.jsxs("b",{children:["$",c.symbol]})
+          ]}))
+        ]})
+      ]}),
+      h.jsx("div",{className:"reader-sec screen-plate ink-ground",style:{padding:"40px",borderRadius:"var(--r-card, 24px)"},children:
+        h.jsxs("div",{className:"reader-grid",children:[
+          h.jsxs("div",{className:"reader-copy",children:[
+            h.jsxs("div",{style:{display:"flex",gap:"16px",alignItems:"center",marginBottom:"16px"},children:[
+              h.jsx(ga,{src:curCoin.image,symbol:curCoin.symbol,size:"lg"}),
+              h.jsxs("div",{children:[
+                h.jsxs("h2",{className:"h2",style:{margin:0},children:["$",curCoin.symbol]}),
+                h.jsx("div",{className:"coin-addr",children:h.jsx(Rc,{value:curCoin.mint,full:!0})})
+              ]})
+            ]}),
+            h.jsxs("div",{style:{display:"flex",gap:"24px",marginBottom:"24px"},children:[
+              h.jsxs("div",{children:[h.jsx("div",{className:"label",children:"Market Cap"}),h.jsx("div",{style:{fontSize:"22px",fontWeight:"600"},children:Di(curCoin.mcapUsd)})]}),
+              h.jsxs("div",{children:[h.jsx("div",{className:"label",children:"Progress"}),h.jsx("div",{style:{fontSize:"22px",fontWeight:"600"},children:`${Math.round(curCoin.progress*100)}% sold`})]}),
+              h.jsxs("div",{children:[h.jsx("div",{className:"label",children:"Holders"}),h.jsx("div",{style:{fontSize:"22px",fontWeight:"600"},children:`${curCoin.holders||58} wallets`})]})
+            ]}),
+            h.jsx("ul",{className:"legend",children:
+              pieData.slices.map(s=>h.jsxs("li",{key:s.key,className:"on",children:[
+                h.jsxs("span",{className:"lg-name",children:[
+                  h.jsx(Oc,{on:s.key,size:18,light:!0}),
+                  s.key==="held"?"Not in a wallet (Curve/Pool)":s.key==="creator"?"Creator's wallet":s.key==="early"?"Early snipers (Slot 1-3)":s.key==="top"?"Top 10 holders":"Everyone else"
+                ]}),
+                h.jsx("span",{className:"fig",children:`${s.pct.toFixed(1)}%`})
+              ]}))
+            }),
+            h.jsxs("div",{style:{marginTop:"24px",display:"flex",gap:"12px",flexWrap:"wrap"},children:[
+              h.jsx("a",{className:"btn primary sm",href:`https://pump.fun/coin/${curCoin.mint}`,target:"_blank",rel:"noreferrer",children:"Trade on pump.fun"}),
+              h.jsx("a",{className:"btn sm",href:`https://solscan.io/account/${curCoin.mint}`,target:"_blank",rel:"noreferrer",children:"View on Solscan"}),
+              h.jsx(Nt,{className:"btn sm",to:`/coin/${curCoin.mint}`,children:"Open Coin Page"})
+            ]})
+          ]}),
+          h.jsxs("div",{className:"reader-pie",children:[
+            h.jsx(ju,{slices:pieData.slices,tone:"ink",open:["held"],title:`$${curCoin.symbol}'s supply pie`}),
+            h.jsxs("div",{className:"reader-cap small",style:{textAlign:"center",marginTop:"16px"},children:[
+              h.jsxs("b",{children:["$",curCoin.symbol]})," · ",
+              h.jsx(Rc,{value:curCoin.mint})," · read just now"
+            ]})
+          ]})
+        ]})
+      })
+    ]})
+  });
+}
+
+function CoinPage(){
+  const loc=wl();
+  const mint=loc.pathname.split("/")[2]||"DPwj48NgpFgvg44Hxc3mXXzSDmvxx2cc5p6qC3Uypump";
+  const boardCoins=Kb(window.__DEFAULT_BOARD__?.rows);
+  const coin=boardCoins.find(c=>c.mint===mint)||{
+    mint:mint,
+    symbol:"PIEX",
+    name:"piexpad",
+    image:"/art/mark.webp",
+    mcapUsd:14200,
+    progress:0.18,
+    phase:"born",
+    quote:"SOL",
+    createdAt:Date.now()-360000,
+    holders:58,
+    pie:{held:72,creator:3.8,rest:24.2}
+  };
+  _b(`$${coin.symbol}`);
+
+  const slices=[
+    {key:"held",pct:coin.pie?.held||72},
+    {key:"creator",pct:coin.pie?.creator||3.8},
+    {key:"rest",pct:coin.pie?.rest||24.2}
+  ];
+
+  return h.jsx("div",{className:"wrap",style:{padding:"80px 0 120px"},children:
+    h.jsxs("div",{className:"coin-page",children:[
+      h.jsx(Nt,{to:"/board",className:"link small",style:{display:"inline-flex",alignItems:"center",gap:"6px",marginBottom:"24px"},children:"← Back to The Board"}),
+      h.jsxs("div",{className:"coin-head",children:[
+        h.jsxs("div",{className:"coin-id",children:[
+          h.jsx(ga,{src:coin.image,symbol:coin.symbol,size:"lg"}),
+          h.jsxs("div",{children:[
+            h.jsxs("h1",{className:"h1",style:{margin:0},children:[coin.name," (",h.jsxs("span",{children:["$",coin.symbol]}),")"]}),
+            h.jsx("div",{className:"coin-addr",children:h.jsx(Rc,{value:coin.mint,full:!0})})
+          ]})
+        ]}),
+        h.jsxs("div",{style:{display:"flex",gap:"12px"},children:[
+          h.jsx("a",{href:`https://pump.fun/coin/${coin.mint}`,target:"_blank",rel:"noreferrer",className:"btn primary",children:"Trade on pump.fun"}),
+          h.jsx("a",{href:`https://solscan.io/account/${coin.mint}`,target:"_blank",rel:"noreferrer",className:"btn",children:"Solscan"})
+        ]})
+      ]}),
+      h.jsxs("dl",{className:"coin-stats",style:{margin:"24px 0 32px"},children:[
+        h.jsxs("div",{children:[h.jsx("dt",{children:"Market Cap"}),h.jsx("dd",{children:Di(coin.mcapUsd)})]}),
+        h.jsxs("div",{children:[h.jsx("dt",{children:"Curve Progress"}),h.jsx("dd",{children:`${Math.round((coin.progress||0)*100)}%`}),h.jsx("dd",{className:"stat-note",children:coin.phase==="graduated"?"Graduated to pool":"Bonding curve active"})]}),
+        h.jsxs("div",{children:[h.jsx("dt",{children:"Holders"}),h.jsx("dd",{children:coin.holders||58})]}),
+        h.jsxs("div",{children:[h.jsx("dt",{children:"Age"}),h.jsx("dd",{children:Wa(coin.createdAt)})]})
+      ]}),
+      h.jsxs("div",{className:"coin-grid",children:[
+        h.jsxs("div",{className:"coin-main",children:[
+          h.jsxs("div",{className:"plate ink-ground",style:{padding:"32px",borderRadius:"var(--r-card, 24px)"},children:[
+            h.jsx("div",{className:"label",children:"Allocation Pie"}),
+            h.jsx("h2",{className:"h2",style:{marginBottom:"16px"},children:"Token Supply Distribution"}),
+            h.jsxs("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(220px, 1fr))",gap:"24px",alignItems:"center"},children:[
+              h.jsx(ju,{slices:slices,tone:"ink",open:["held"],size:240,title:`$${coin.symbol}'s pie`}),
+              h.jsxs("div",{children:[
+                h.jsx("ul",{className:"legend",children:[
+                  h.jsxs("li",{className:"on",children:[
+                    h.jsxs("span",{className:"lg-name",children:[h.jsx(Oc,{on:"held",size:16,light:!0}),"Not in a wallet (Curve/Pool)"]}),
+                    h.jsx("span",{className:"fig",children:`${(coin.pie?.held||72).toFixed(1)}%`})
+                  ]}),
+                  h.jsxs("li",{className:"on",children:[
+                    h.jsxs("span",{className:"lg-name",children:[h.jsx(Oc,{on:"creator",size:16,light:!0}),"Creator's wallet"]}),
+                    h.jsx("span",{className:"fig",children:`${(coin.pie?.creator||3.8).toFixed(1)}%`})
+                  ]}),
+                  h.jsxs("li",{className:"on",children:[
+                    h.jsxs("span",{className:"lg-name",children:[h.jsx(Oc,{on:"rest",size:16,light:!0}),"Everyone else / Community"]}),
+                    h.jsx("span",{className:"fig",children:`${(coin.pie?.rest||24.2).toFixed(1)}%`})
+                  ]})
+                ]}),
+                h.jsx("div",{className:"small",style:{marginTop:"16px",color:"var(--muted-ink)"},children:"Each wallet counted once. The creator's side pulled out in red, trading open supply left open."})
+              ]})
+            ]})
+          ]}),
+          h.jsxs("div",{className:"plate",style:{padding:"32px",borderRadius:"var(--r-card, 24px)"},children:[
+            h.jsx("div",{className:"label",children:"Bonding Curve Info"}),
+            h.jsx("h3",{className:"h3",style:{marginBottom:"12px"},children:"Pump.fun Curve Mechanics"}),
+            h.jsx("p",{children:"When the bonding curve reaches 100% (85 SOL deposited), liquidity is automatically migrated to the decentralized exchange pool and burned forever."}),
+            h.jsxs("div",{style:{width:"100%",background:"var(--line-2)",height:"12px",borderRadius:"6px",overflow:"hidden",marginTop:"12px"},children:[
+              h.jsx("div",{style:{width:`${Math.min(100, Math.round((coin.progress||0)*100))}%`,background:"var(--ink)",height:"100%"}})
+            ]})
+          ]})
+        ]}),
+        h.jsxs("div",{className:"coin-rail",children:[
+          h.jsxs("div",{className:"plate ink-ground",style:{padding:"24px",borderRadius:"var(--r-card, 24px)"},children:[
+            h.jsx("div",{className:"label",children:"Quick Trade"}),
+            h.jsxs("h3",{className:"h3",children:["Buy $",coin.symbol]}),
+            h.jsx("p",{className:"small",children:"Directly on pump.fun with your Phantom or Solflare wallet."}),
+            h.jsx("a",{href:`https://pump.fun/coin/${coin.mint}`,target:"_blank",rel:"noreferrer",className:"btn primary lg",style:{width:"100%",marginTop:"16px",textAlign:"center"},children:"Buy on pump.fun"})
+          ]}),
+          h.jsxs("div",{className:"plate",style:{padding:"24px",borderRadius:"var(--r-card, 24px)"},children:[
+            h.jsx("div",{className:"label",children:"Contract Details"}),
+            h.jsxs("dl",{style:{margin:"12px 0 0",display:"grid",gap:"8px",fontSize:"13px"},children:[
+              h.jsxs("div",{style:{display:"flex",justifyContent:"space-between"},children:[h.jsx("span",{children:"Decimals"}),h.jsx("b",{children:"6"})]}),
+              h.jsxs("div",{style:{display:"flex",justifyContent:"space-between"},children:[h.jsx("span",{children:"Total Supply"}),h.jsx("b",{children:"1,000,000,000"})]}),
+              h.jsxs("div",{style:{display:"flex",justifyContent:"space-between"},children:[h.jsx("span",{children:"Network"}),h.jsx("b",{children:"Solana Mainnet"})]}),
+              h.jsxs("div",{style:{display:"flex",justifyContent:"space-between"},children:[h.jsx("span",{children:"Curve Cap"}),h.jsx("b",{children:"800,000,000"})]})
+            ]})
+          ]})
+        ]})
+      ]})
+    ]})
+  });
+}
+
+function DocsPage(){
+  _b("Docs");
+  return h.jsx("div",{className:"wrap",style:{padding:"80px 0 120px"},children:
+    h.jsxs("div",{children:[
+      h.jsxs("div",{className:"sec-head",children:[
+        h.jsxs("div",{children:[
+          h.jsx("div",{className:"label",children:"Knowledge Base"}),
+          h.jsx("h1",{className:"h1",children:"How piexpad works."})
+        ]}),
+        h.jsx("p",{className:"lede",children:"Everything about reading supply pies, token allocations, fair launches, and Solana bonding curve verification."})
+      ]}),
+      h.jsxs("div",{className:"docs",children:[
+        h.jsxs("nav",{className:"docs-nav",children:[
+          h.jsx("a",{href:"#what-is-piexpad",children:"What is piexpad?"}),
+          h.jsx("a",{href:"#the-pie",children:"The Supply Pie"}),
+          h.jsx("a",{href:"#slices",children:"Five Slices Explained"}),
+          h.jsx("a",{href:"#bonding-curve",children:"Bonding Curve"}),
+          h.jsx("a",{href:"#launching",children:"Launching a Coin"}),
+          h.jsx("a",{href:"#security",children:"Security & Wallets"})
+        ]}),
+        h.jsxs("div",{className:"docs-body",children:[
+          h.jsxs("section",{id:"what-is-piexpad",children:[
+            h.jsx("h2",{children:"What is piexpad?"}),
+            h.jsx("p",{children:"piexpad is an open terminal and launchpad for Solana tokens. Instead of guessing who owns a coin or whether the creator holds 40% in secret sub-wallets, piexpad breaks down the whole pie into clear, verifiable slices before you trade."})
+          ]}),
+          h.jsxs("section",{id:"the-pie",children:[
+            h.jsx("h2",{children:"The Supply Pie"}),
+            h.jsx("p",{children:"Every token on Solana has 1 billion units of supply. On a typical DEX chart, it's hard to tell how much the dev holds versus the liquidity pool. piexpad reads the blockchain in real-time, grouping supply into 5 distinct categories."})
+          ]}),
+          h.jsxs("section",{id:"slices",children:[
+            h.jsx("h2",{children:"The Five Slices"}),
+            h.jsxs("ul",{children:[
+              h.jsxs("li",{children:[h.jsx("b",{children:"Held (Curve / Pool): "}),"Tokens remaining in the automated bonding curve or locked in liquidity pools for sale."]}),
+              h.jsxs("li",{children:[h.jsx("b",{children:"Creator (Red): "}),"The creator's personal wallet allocation bought at birth or held since token creation."]}),
+              h.jsxs("li",{children:[h.jsx("b",{children:"Early Snipers: "}),"Wallets that bought within the first 3 slots after token genesis."]}),
+              h.jsxs("li",{children:[h.jsx("b",{children:"Top Wallets: "}),"The largest 10 non-creator wallets holding the token."]}),
+              h.jsxs("li",{children:[h.jsx("b",{children:"Rest (Ink): "}),"All other public wallets and decentralized community traders."]})
+            ]})
+          ]}),
+          h.jsxs("section",{id:"bonding-curve",children:[
+            h.jsx("h2",{children:"Solana Bonding Curve"}),
+            h.jsx("p",{children:"Tokens launched via piexpad utilize pump.fun's mathematical bonding curve. 800M tokens (80%) are deposited into the curve. As traders buy tokens with SOL, price increases along the curve. When 85 SOL is deposited (approx $69k market cap), the curve graduates and deposits liquidity automatically."})
+          ]}),
+          h.jsxs("section",{id:"launching",children:[
+            h.jsx("h2",{children:"Launching a Coin"}),
+            h.jsx("p",{children:"Anyone can launch a coin on piexpad in seconds. You only need a name, ticker, and optional image. You can optionally purchase an initial allocation in the genesis transaction. The coin appears live on The Board immediately."})
+          ]}),
+          h.jsxs("section",{id:"security",children:[
+            h.jsx("h2",{children:"Security & Non-Custodial"}),
+            h.jsx("p",{children:"piexpad is 100% non-custodial. We never store private keys, manage custodial funds, or execute automated trades without user signature. All transactions are approved directly in your own wallet (Phantom, Solflare, or Backpack)."})
+          ]})
+        ]})
+      ]})
+    ]})
+  });
+}
+
+function KitPage(){
+  _b("Brand kit");
+  return h.jsx("div",{className:"wrap",style:{padding:"80px 0 120px"},children:
+    h.jsxs("div",{children:[
+      h.jsxs("div",{className:"sec-head",children:[
+        h.jsxs("div",{children:[
+          h.jsx("div",{className:"label",children:"Brand & Media"}),
+          h.jsx("h1",{className:"h1",children:"piexpad brand kit."})
+        ]}),
+        h.jsx("p",{className:"lede",children:"Official marks, logos, color palettes, and typography for piexpad."})
+      ]}),
+      h.jsxs("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(260px, 1fr))",gap:"24px"},children:[
+        h.jsxs("div",{className:"plate ink-ground",style:{padding:"32px",borderRadius:"24px",textAlign:"center"},children:[
+          h.jsx("img",{src:"/art/mark.webp",alt:"piexpad logo",style:{width:"96px",height:"96px",objectFit:"contain",margin:"0 auto 16px"}}),
+          h.jsx("h3",{className:"h3",children:"Primary Mark"}),
+          h.jsx("p",{className:"small",children:"WebP & PNG available"}),
+          h.jsx("a",{href:"/art/mark.webp",download:!0,className:"btn sm primary",style:{marginTop:"12px"},children:"Download Mark"})
+        ]}),
+        h.jsxs("div",{className:"plate",style:{padding:"32px",borderRadius:"24px"},children:[
+          h.jsx("div",{className:"label",children:"Color Palette"}),
+          h.jsxs("div",{style:{display:"grid",gap:"12px",marginTop:"16px"},children:[
+            h.jsxs("div",{style:{display:"flex",alignItems:"center",gap:"12px"},children:[
+              h.jsx("div",{style:{width:"32px",height:"32px",background:"#feecd6",borderRadius:"8px",border:"1px solid #ddd"}}),
+              h.jsxs("div",{children:[h.jsx("b",{children:"Cream (Paper)"}),h.jsx("div",{className:"small",children:"#feecd6"})]})
+            ]}),
+            h.jsxs("div",{style:{display:"flex",alignItems:"center",gap:"12px"},children:[
+              h.jsx("div",{style:{width:"32px",height:"32px",background:"#181512",borderRadius:"8px"}}),
+              h.jsxs("div",{children:[h.jsx("b",{children:"Ink (Dark)"}),h.jsx("div",{className:"small",children:"#181512"})]})
+            ]}),
+            h.jsxs("div",{style:{display:"flex",alignItems:"center",gap:"12px"},children:[
+              h.jsx("div",{style:{width:"32px",height:"32px",background:"#e5533d",borderRadius:"8px"}}),
+              h.jsxs("div",{children:[h.jsx("b",{children:"Creator Red"}),h.jsx("div",{className:"small",children:"#e5533d"})]})
+            ]})
+          ]})
+        ]})
+      ]})
+    ]})
+  });
+}
+
+const zn={
+  board:()=>Promise.resolve({default:BoardPage}),
+  coin:()=>Promise.resolve({default:CoinPage}),
+  launch:()=>Promise.resolve({default:LaunchPage}),
+  pie:()=>Promise.resolve({default:ReaderPage}),
+  docs:()=>Promise.resolve({default:DocsPage}),
+  kit:()=>Promise.resolve({default:KitPage})
+};
+const lE=BoardPage,aE=CoinPage,nE=LaunchPage,Xy=ReaderPage,uE=DocsPage,iE=KitPage;
+
+class sE extends b.Component{constructor(){super(...arguments);ae(this,"state",{error:null})}static getDerivedStateFromError(r){return{error:r}}componentDidCatch(r){/dynamically imported module|Importing a module script failed|Failed to fetch/i.test(String(r==null?void 0:r.message))&&Cv()}render(){return this.state.error?h.jsxs("div",{className:"wrap",style:{padding:"120px 0"},children:[h.jsx(Bf,{kind:"error",title:"This page did not load.",children:"The rest of piexpad still works. Reload to fetch the newest version."}),h.jsx(Hl,{onClick:()=>location.reload(),children:"Reload"})]}):this.props.children}}function cE(){const u=wl();return b.useEffect(()=>{var s;(s=window.__lenis)==null||s.scrollTo(0,{immediate:!0}),window.scrollTo(0,0)},[u.pathname]),h.jsxs(h.Fragment,{children:[h.jsx(lb,{}),h.jsx("main",{children:h.jsx(sE,{children:h.jsx(b.Suspense,{fallback:h.jsx("div",{className:"page-wait","aria-busy":"true"}),children:h.jsxs(AS,{children:[h.jsx(Il,{path:"/",element:h.jsx(Pb,{})}),h.jsx(Il,{path:"/board",element:h.jsx(lE,{})}),h.jsx(Il,{path:"/coin/:mint",element:h.jsx(aE,{})}),h.jsx(Il,{path:"/launch",element:h.jsx(nE,{})}),h.jsx(Il,{path:"/pie",element:h.jsx(Xy,{})}),h.jsx(Il,{path:"/pie/:mint",element:h.jsx(Xy,{})}),h.jsx(Il,{path:"/docs",element:h.jsx(uE,{})}),h.jsx(Il,{path:"/kit",element:h.jsx(iE,{})}),h.jsx(Il,{path:"*",element:h.jsxs("div",{className:"wrap",style:{padding:"140px 0"},children:[h.jsx(Bf,{title:"Nothing is printed here.",children:"That page does not exist. The board and the pie reader are a click away."}),h.jsx(Hl,{to:"/board",children:"Open the board"})]})})]})})},u.pathname)}),h.jsx(ab,{}),h.jsx(ub,{}),h.jsx(sb,{})]})}function rE(){return b.useEffect(()=>{if((window.requestIdleCallback||(o=>setTimeout(o,1500)))(()=>Object.values(zn).forEach(o=>o().catch(()=>{}))),matchMedia("(prefers-reduced-motion: reduce)").matches)return;const s=new g2({duration:1.15,wheelMultiplier:.9});window.__lenis=s;let r;const c=o=>{s.raf(o),r=requestAnimationFrame(c)};return r=requestAnimationFrame(c),()=>{cancelAnimationFrame(r),s.destroy(),delete window.__lenis}},[]),h.jsx(L2,{children:h.jsx(t2,{children:h.jsx(cE,{})})})}addEventListener("vite:preloadError",u=>{_v()||(u.preventDefault(),Cv())});M1.createRoot(document.getElementById("root")).render(h.jsx(b.StrictMode,{children:h.jsx(rE,{})}));export{Rc as A,wc as B,Rv as C,qf as D,Fa as E,Cb as F,M2 as G,Nf as H,Ac as I,Oc as J,Hl as K,tb as L,ga as M,Ui as N,ju as P,Pl as Q,Ri as R,bu as S,Ev as W,Tc as a,hE as b,wl as c,Db as d,Hf as e,Nt as f,Di as g,mE as h,Bf as i,h as j,pv as k,vE as l,dv as m,dE as n,eb as o,P2 as p,yE as q,b as r,Ab as s,Mv as t,_b as u,fE as v,zv as w,Wa as x,bv as y,Ob as z};
