@@ -1,9 +1,9 @@
 {
-  "featured": "live now on robinhood chain",
+  "featured": "0xd94853c978F0465eB17D98ea24b21731a638D648",
   "featuredRule": "most traded",
   "bornB": [
     {
-      "mint": "live now on robinhood chain",
+      "mint": "0xd94853c978F0465eB17D98ea24b21731a638D648",
       "symbol": "PIEX",
       "name": "piexpad",
       "image": "/art/mark.webp",
@@ -98,7 +98,7 @@
   "rows": {
     "born": [
       {
-        "mint": "live now on robinhood chain",
+        "mint": "0xd94853c978F0465eB17D98ea24b21731a638D648",
         "symbol": "PIEX",
         "name": "piexpad",
         "image": "/art/mark.webp",

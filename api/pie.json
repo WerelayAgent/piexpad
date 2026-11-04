@@ -1,7 +1,7 @@
 {
   "read": "2026-11-04T12:00:00Z",
   "status": "read",
-  "deployer": "live now on robinhood chain",
+  "deployer": "0xd94853c978F0465eB17D98ea24b21731a638D648",
   "signature": "5hG7fD9sAqWeRtYuIoPnMvBvCxZlKjHgFdSaQw88pump",
   "devBuy": 38000000,
   "early": [],
@@ -15,13 +15,13 @@
     "mcap": 14200,
     "createdAt": 1730000000000,
     "holders": 58,
-    "dev": "live now on robinhood chain"
+    "dev": "0xd94853c978F0465eB17D98ea24b21731a638D648"
   },
   "venue": {
     "kind": "robinhood",
     "complete": false,
     "left": 650000000,
-    "creator": "live now on robinhood chain",
+    "creator": "0xd94853c978F0465eB17D98ea24b21731a638D648",
     "creatorIsWallet": true
   },
   "top": [
@@ -32,7 +32,7 @@
       "label": "Robinhood Chain curve"
     },
     {
-      "owner": "live now on robinhood chain",
+      "owner": "0xd94853c978F0465eB17D98ea24b21731a638D648",
       "amount": 38000000,
       "kind": "wallet",
       "label": "Creator"

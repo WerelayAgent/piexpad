@@ -4,7 +4,7 @@
   <img src="art/mark.webp" alt="piexpad Logo" width="160" />
   <p><strong>piexpad launches Robinhood Chain coins and prints every coin's whole pie: who held the supply when trading opened, the creator's side, and the transaction behind every slice.</strong></p>
 
-  [![Contract Address](https://img.shields.io/badge/Contract-Robinhood%20Chain-green?style=for-the-badge)](https://explorer.robinhood.com/)
+  [![Contract Address](https://img.shields.io/badge/Contract-0xd94853...D648-green?style=for-the-badge)](https://explorer.robinhood.com/address/0xd94853c978F0465eB17D98ea24b21731a638D648)
   [![Ticker](https://img.shields.io/badge/Ticker-%24PIEXPAD-blue?style=for-the-badge)](#)
   [![Platform](https://img.shields.io/badge/Venue-Robinhood%20Chain%20DEX-brightgreen?style=for-the-badge)](https://explorer.robinhood.com/)
 </div>
@@ -28,8 +28,8 @@
 | **Token Name** | **piexpad** |
 | **Ticker** | **$PIEXPAD** |
 | **Network** | Robinhood Chain (EVM L2) |
-| **Contract Address (CA)** | `live now on robinhood chain` |
-| **Launch Venue** | [Robinhood Chain DEX](https://explorer.robinhood.com/) |
+| **Contract Address (CA)** | `0xd94853c978F0465eB17D98ea24b21731a638D648` |
+| **Launch Venue** | [Robinhood Chain DEX](https://explorer.robinhood.com/address/0xd94853c978F0465eB17D98ea24b21731a638D648) |
 | **Official X** | [@piexpad](https://x.com/piexpad) |
 
 ---
