@@ -18,7 +18,7 @@
     "dev": "DMay7oCBcWUywffxYi8yPtPPuY8TPypjtZzHnDsgpump"
   },
   "venue": {
-    "kind": "pump",
+    "kind": "robinhood",
     "complete": false,
     "left": 650000000,
     "creator": "DMay7oCBcWUywffxYi8yPtPPuY8TPypjtZzHnDsgpump",
@@ -29,7 +29,7 @@
       "owner": "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pGE4j1",
       "amount": 720000000,
       "kind": "curve",
-      "label": "pump.fun curve"
+      "label": "Robinhood Chain curve"
     },
     {
       "owner": "DMay7oCBcWUywffxYi8yPtPPuY8TPypjtZzHnDsgpump",
