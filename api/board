@@ -1,9 +1,9 @@
 {
-  "featured": "DMay7oCBcWUywffxYi8yPtPPuY8TPypjtZzHnDsgpump",
+  "featured": "live now on robinhood chain",
   "featuredRule": "most traded",
   "bornB": [
     {
-      "mint": "DMay7oCBcWUywffxYi8yPtPPuY8TPypjtZzHnDsgpump",
+      "mint": "live now on robinhood chain",
       "symbol": "PIEX",
       "name": "piexpad",
       "image": "/art/mark.webp",
@@ -98,7 +98,7 @@
   "rows": {
     "born": [
       {
-        "mint": "DMay7oCBcWUywffxYi8yPtPPuY8TPypjtZzHnDsgpump",
+        "mint": "live now on robinhood chain",
         "symbol": "PIEX",
         "name": "piexpad",
         "image": "/art/mark.webp",

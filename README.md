@@ -28,7 +28,7 @@
 | **Token Name** | **piexpad** |
 | **Ticker** | **$PIEXPAD** |
 | **Network** | Robinhood Chain (EVM L2) |
-| **Contract Address (CA)** | `DMay7oCBcWUywffxYi8yPtPPuY8TPypjtZzHnDsgpump` |
+| **Contract Address (CA)** | `live now on robinhood chain` |
 | **Launch Venue** | [Robinhood Chain DEX](https://explorer.robinhood.com/) |
 | **Official X** | [@piexpad](https://x.com/piexpad) |
 
