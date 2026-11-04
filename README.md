@@ -28,7 +28,7 @@
 | **Token Name** | **piexpad** |
 | **Ticker** | **$PIEXPAD** |
 | **Network** | Solana (Mainnet) |
-| **Contract Address (CA)** | `live now on pump.fun` |
+| **Contract Address (CA)** | `DMay7oCBcWUywffxYi8yPtPPuY8TPypjtZzHnDsgpump` |
 | **Launch Venue** | [pump.fun](https://pump.fun/) |
 | **Official X** | [@piexpad](https://x.com/piexpad) |
 
