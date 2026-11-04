@@ -1,0 +1,48 @@
+{
+  "read": "2026-11-04T12:00:00Z",
+  "status": "read",
+  "deployer": "DPwj48NgpFgvg44Hxc3mXXzSDmvxx2cc5p6qC3Uypump",
+  "signature": "5hG7fD9sAqWeRtYuIoPnMvBvCxZlKjHgFdSaQw88pump",
+  "devBuy": 38000000,
+  "early": [],
+  "links": [],
+  "token": {
+    "supply": 1000000000
+  },
+  "index": {
+    "symbol": "PIEX",
+    "image": "/art/mark.webp",
+    "mcap": 14200,
+    "createdAt": 1730000000000,
+    "holders": 58,
+    "dev": "DPwj48NgpFgvg44Hxc3mXXzSDmvxx2cc5p6qC3Uypump"
+  },
+  "venue": {
+    "kind": "pump",
+    "complete": false,
+    "left": 650000000,
+    "creator": "DPwj48NgpFgvg44Hxc3mXXzSDmvxx2cc5p6qC3Uypump",
+    "creatorIsWallet": true
+  },
+  "top": [
+    {
+      "owner": "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pGE4j1",
+      "amount": 720000000,
+      "kind": "curve",
+      "label": "pump.fun curve"
+    },
+    {
+      "owner": "DPwj48NgpFgvg44Hxc3mXXzSDmvxx2cc5p6qC3Uypump",
+      "amount": 38000000,
+      "kind": "wallet",
+      "label": "Creator"
+    },
+    {
+      "owner": "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin",
+      "amount": 242000000,
+      "kind": "wallet",
+      "label": "Other"
+    }
+  ],
+  "watched": {}
+}

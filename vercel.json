@@ -6,7 +6,7 @@
   "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/((?!assets/|art/|favicon.*|apple-touch-icon.*|og.png).*)",
+      "source": "/((?!assets/|art/|api/|data/|favicon.*|apple-touch-icon.*|og.png).*)",
       "destination": "/index.html"
     }
   ],
